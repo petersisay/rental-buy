@@ -95,6 +95,10 @@ const propertySchema = new mongoose.Schema(
       type: String,
       default: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'
     },
+    images: {
+      type: [String],
+      default: []
+    },
     amenities: {
       type: String,
       default: ''
