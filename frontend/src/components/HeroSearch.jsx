@@ -1,24 +1,38 @@
 import React from 'react';
-import { Search, Home, Key, IndianRupee, MapPin, Building } from 'lucide-react';
+import { Search, Home, Key } from 'lucide-react';
 
-export default function HeroSearch({ filters, onFilterChange, onSearch, onReset }) {
-  // Budget options tailored based on whether user selects Buy or Rent
-  const buyBudgetOptions = [
+export default function HeroSearch({ filters, onFilterChange, onSearch, onReset, lang, t }) {
+  // Ethiopian Birr (ETB) Budget Options tailored for Buy vs. Rent
+  const buyBudgetOptions = lang === 'am' ? [
+    { label: 'ማንኛውም ዋጋ', value: '' },
+    { label: 'ከ 10,000,000 ብር በታች', max: 10000000 },
+    { label: '10,000,000 - 25,000,000 ብር', min: 10000000, max: 25000000 },
+    { label: '25,000,000 - 50,000,000 ብር', min: 25000000, max: 50000000 },
+    { label: '50,000,000 - 80,000,000 ብር', min: 50000000, max: 80000000 },
+    { label: 'ከ 80,000,000 ብር በላይ', min: 80000000 }
+  ] : [
     { label: 'Any Budget', value: '' },
-    { label: 'Under ₹50 Lakh', max: 5000000 },
-    { label: '₹50 Lakh - ₹1 Crore', min: 5000000, max: 10000000 },
-    { label: '₹1 Crore - ₹2 Crore', min: 10000000, max: 20000000 },
-    { label: '₹2 Crore - ₹5 Crore', min: 20000000, max: 50000000 },
-    { label: 'Above ₹5 Crore', min: 50000000 }
+    { label: 'Under 10M ETB', max: 10000000 },
+    { label: '10M - 25M ETB', min: 10000000, max: 25000000 },
+    { label: '25M - 50M ETB', min: 25000000, max: 50000000 },
+    { label: '50M - 80M ETB', min: 50000000, max: 80000000 },
+    { label: 'Above 80M ETB', min: 80000000 }
   ];
 
-  const rentBudgetOptions = [
+  const rentBudgetOptions = lang === 'am' ? [
+    { label: 'ማንኛውም ዋጋ', value: '' },
+    { label: 'ከ 25,000 ብር በታች / ወር', max: 25000 },
+    { label: '25,000 - 50,000 ብር / ወር', min: 25000, max: 50000 },
+    { label: '50,000 - 100,000 ብር / ወር', min: 50000, max: 100000 },
+    { label: '100,000 - 180,000 ብር / ወር', min: 100000, max: 180000 },
+    { label: 'ከ 180,000 ብር በላይ / ወር', min: 180000 }
+  ] : [
     { label: 'Any Budget', value: '' },
-    { label: 'Under ₹30,000 / month', max: 30000 },
-    { label: '₹30,000 - ₹50,000 / month', min: 30000, max: 50000 },
-    { label: '₹50,000 - ₹1 Lakh / month', min: 50000, max: 100000 },
-    { label: '₹1 Lakh - ₹2 Lakh / month', min: 100000, max: 200000 },
-    { label: 'Above ₹2 Lakh / month', min: 200000 }
+    { label: 'Under 25,000 ETB / month', max: 25000 },
+    { label: '25,000 - 50,000 ETB / month', min: 25000, max: 50000 },
+    { label: '50,000 - 100,000 ETB / month', min: 50000, max: 100000 },
+    { label: '100,000 - 180,000 ETB / month', min: 100000, max: 180000 },
+    { label: 'Above 180,000 ETB / month', min: 180000 }
   ];
 
   const budgetOptions = filters.purpose === 'rent' ? rentBudgetOptions : buyBudgetOptions;
@@ -47,10 +61,10 @@ export default function HeroSearch({ filters, onFilterChange, onSearch, onReset 
     <section className="hero-section">
       <div className="hero-content">
         <h1 className="hero-title">
-          Find Your Dream Property in <span>Bangalore & Mumbai</span>
+          {t.heroTitlePrefix}<span>{t.heroTitleHighlight}</span>
         </h1>
         <p className="hero-subtitle">
-          Over 20 hand-picked verified flats and independent houses available to Buy or Rent
+          {t.heroSubtitle}
         </p>
 
         <div className="search-card">
@@ -62,7 +76,7 @@ export default function HeroSearch({ filters, onFilterChange, onSearch, onReset 
               type="button"
             >
               <Home size={18} />
-              <span>Buy Properties</span>
+              <span>{t.tabBuy}</span>
             </button>
             <button
               className={`tab-btn ${filters.purpose === 'rent' ? 'active' : ''}`}
@@ -70,7 +84,7 @@ export default function HeroSearch({ filters, onFilterChange, onSearch, onReset 
               type="button"
             >
               <Key size={18} />
-              <span>Rent Properties</span>
+              <span>{t.tabRent}</span>
             </button>
           </div>
 
@@ -78,35 +92,35 @@ export default function HeroSearch({ filters, onFilterChange, onSearch, onReset 
           <div className="search-fields-grid">
             {/* City */}
             <div className="field-group">
-              <label className="field-label">City</label>
+              <label className="field-label">{t.labelCity}</label>
               <select
                 className="field-select"
                 value={filters.city}
                 onChange={(e) => onFilterChange({ city: e.target.value })}
               >
-                <option value="">Bangalore & Mumbai</option>
-                <option value="Bangalore">Bangalore</option>
-                <option value="Mumbai">Mumbai</option>
+                <option value="">{t.allCities}</option>
+                <option value="Addis Ababa">{t.addisAbaba}</option>
+                <option value="Adama">{t.adama}</option>
               </select>
             </div>
 
             {/* Property Type (flat or house/hause) */}
             <div className="field-group">
-              <label className="field-label">Property Type</label>
+              <label className="field-label">{t.labelType}</label>
               <select
                 className="field-select"
                 value={filters.property_type}
                 onChange={(e) => onFilterChange({ property_type: e.target.value })}
               >
-                <option value="">All Types</option>
-                <option value="flat">Flat / Apartment</option>
-                <option value="house">House / Villa</option>
+                <option value="">{t.allTypes}</option>
+                <option value="flat">{t.typeFlat}</option>
+                <option value="house">{t.typeHouse}</option>
               </select>
             </div>
 
-            {/* Budget */}
+            {/* Budget in ETB */}
             <div className="field-group">
-              <label className="field-label">Budget</label>
+              <label className="field-label">{t.labelBudget}</label>
               <select
                 className="field-select"
                 value={getSelectedBudgetIndex()}
@@ -120,29 +134,29 @@ export default function HeroSearch({ filters, onFilterChange, onSearch, onReset 
               </select>
             </div>
 
-            {/* BHK Selection */}
+            {/* BHK / Bedroom Selection */}
             <div className="field-group">
-              <label className="field-label">Bedrooms (BHK)</label>
+              <label className="field-label">{t.labelBeds}</label>
               <select
                 className="field-select"
                 value={filters.bhk || ''}
                 onChange={(e) => onFilterChange({ bhk: e.target.value ? parseInt(e.target.value, 10) : null })}
               >
-                <option value="">Any BHK</option>
-                <option value="1">1 BHK</option>
-                <option value="2">2 BHK</option>
-                <option value="3">3 BHK</option>
-                <option value="4">4+ BHK</option>
+                <option value="">{t.anyBeds}</option>
+                <option value="1">1 {t.bedCount}</option>
+                <option value="2">2 {t.bedsCount}</option>
+                <option value="3">3 {t.bedsCount}</option>
+                <option value="4">4+ {t.bedsCount}</option>
               </select>
             </div>
 
             {/* Locality / Keyword */}
             <div className="field-group" style={{ gridColumn: 'span 2' }}>
-              <label className="field-label">Locality or Keyword</label>
+              <label className="field-label">{t.labelLocality}</label>
               <input
                 type="text"
                 className="field-input"
-                placeholder="e.g. Indiranagar, Whitefield, Bandra, Powai..."
+                placeholder={t.placeholderLocality}
                 value={filters.search}
                 onChange={(e) => onFilterChange({ search: e.target.value })}
                 onKeyDown={(e) => e.key === 'Enter' && onSearch()}
@@ -153,7 +167,7 @@ export default function HeroSearch({ filters, onFilterChange, onSearch, onReset 
             <div className="field-group">
               <button className="btn-search-main" onClick={onSearch} type="button">
                 <Search size={18} />
-                <span>Search</span>
+                <span>{t.btnSearch}</span>
               </button>
             </div>
           </div>
