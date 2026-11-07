@@ -1,52 +1,61 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
+    googleId: {
+      type: String,
+      default: null
+    },
+    avatar: {
+      type: String,
+      default: ''
+    },
+    role: {
+      type: String,
+      enum: ['owner', 'agent', 'developer', 'admin', 'seeker'],
+      default: 'seeker'
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending' // Admin must approve newly registered users
+    },
+    phone: {
+      type: String,
+      default: ''
+    },
+    company: {
+      type: String,
+      default: ''
+    },
+    city: {
+      type: String,
+      default: 'Addis Ababa'
+    }
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  googleId: {
-    type: String,
-    default: null
-  },
-  avatar: {
-    type: String,
-    default: ''
-  },
-  role: {
-    type: String,
-    enum: ['owner', 'agent', 'developer', 'admin', 'seeker'],
-    default: 'seeker'
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending' // Admin must approve newly registered users
-  },
-  phone: {
-    type: String,
-    default: ''
-  },
-  company: {
-    type: String,
-    default: ''
-  },
-  city: {
-    type: String,
-    default: 'Addis Ababa'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  {
+    timestamps: true
+  }
+);
+
+userSchema.set('toJSON', {
+  virtuals: true,
+  transform: (doc, ret) => {
+    ret.id = ret._id.toString();
+    return ret;
   }
 });
 
-module.exports = mongoose.model('User', UserSchema);
+export const User = mongoose.models.User || mongoose.model('User', userSchema);
