@@ -1,15 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
+import RoleNavigation from './components/RoleNavigation';
 import HeroSearch from './components/HeroSearch';
 import PropertyCard from './components/PropertyCard';
 import PropertyModal from './components/PropertyModal';
 import FavoritesDrawer from './components/FavoritesDrawer';
+import OwnerPortal from './components/OwnerPortal';
+import AgentPortal from './components/AgentPortal';
+import DeveloperPortal from './components/DeveloperPortal';
+import AdminPortal from './components/AdminPortal';
 import { translations } from './locales/translations';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const API_BASE = 'http://127.0.0.1:8000';
 
 export default function App() {
+  // Active Portal/Page State: 'search', 'owners', 'agents', 'developers', 'admin'
+  const [activePortal, setActivePortal] = useState('search');
+
   // Language State: Amharic ('am') or English ('en')
   const [lang, setLang] = useState(() => {
     try {
@@ -39,7 +47,7 @@ export default function App() {
 
   // Search & Filter State
   const [filters, setFilters] = useState({
-    purpose: 'buy', // default to buy
+    purpose: 'buy',
     city: '',
     property_type: '',
     min_price: null,
@@ -72,9 +80,9 @@ export default function App() {
 
   const toggleFavorite = (property) => {
     setFavorites((prev) => {
-      const exists = prev.some((p) => p.id === property.id);
+      const exists = prev.some((p) => (p.id || p._id) === (property.id || property._id));
       if (exists) {
-        return prev.filter((p) => p.id !== property.id);
+        return prev.filter((p) => (p.id || p._id) !== (property.id || property._id));
       } else {
         return [...prev, property];
       }
@@ -82,10 +90,10 @@ export default function App() {
   };
 
   const removeFavorite = (id) => {
-    setFavorites((prev) => prev.filter((p) => p.id !== id));
+    setFavorites((prev) => prev.filter((p) => (p.id || p._id) !== id));
   };
 
-  // Fetch properties from FastAPI backend
+  // Fetch properties from Express MERN backend
   const fetchProperties = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -99,6 +107,11 @@ export default function App() {
     if (filters.bhk !== null && filters.bhk !== undefined) queryParams.append('bhk', filters.bhk);
     if (filters.search) queryParams.append('search', filters.search);
 
+    // If on admin or specific portal, fetch all statuses so review queues work
+    if (activePortal === 'admin' || activePortal === 'owners' || activePortal === 'agents') {
+      queryParams.append('status', 'all');
+    }
+
     try {
       const res = await fetch(`${API_BASE}/api/properties?${queryParams.toString()}`);
       if (!res.ok) {
@@ -111,9 +124,9 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, activePortal]);
 
-  // Initial fetch and fetch when filters change
+  // Initial fetch and fetch when filters or portal changes
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
@@ -134,6 +147,38 @@ export default function App() {
     });
   };
 
+  // Handlers for Add, Update Status, Delete
+  const handleAddProperty = async (propertyData) => {
+    const res = await fetch(`${API_BASE}/api/properties`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(propertyData)
+    });
+    if (!res.ok) throw new Error('Failed to create property listing.');
+    await fetchProperties();
+  };
+
+  const handleUpdateStatus = async (id, status) => {
+    const res = await fetch(`${API_BASE}/api/properties/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    if (!res.ok) throw new Error('Failed to update property status.');
+    await fetchProperties();
+  };
+
+  const handleDeleteProperty = async (id) => {
+    const confirmMsg = lang === 'am' ? 'እርግጠኛ ነዎት ይህንን ንብረት መሰረዝ ይፈልጋሉ?' : 'Are you sure you want to delete this property?';
+    if (!window.confirm(confirmMsg)) return;
+
+    const res = await fetch(`${API_BASE}/api/properties/${id}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error('Failed to delete property.');
+    await fetchProperties();
+  };
+
   const getCityDisplayName = (cityName) => {
     if (!cityName) return t.allCities;
     if (cityName === 'Addis Ababa') return t.addisAbaba;
@@ -141,11 +186,17 @@ export default function App() {
     return cityName;
   };
 
+  const pendingCount = properties.filter(p => p.status === 'pending').length;
+
   return (
     <div className="app">
+      {/* Top Navbar */}
       <Navbar
         city={filters.city}
-        onCityChange={(city) => updateFilters({ city })}
+        onCityChange={(city) => {
+          updateFilters({ city });
+          if (activePortal !== 'search') setActivePortal('search');
+        }}
         favoritesCount={favorites.length}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
         lang={lang}
@@ -153,132 +204,193 @@ export default function App() {
         t={t}
       />
 
-      <HeroSearch
-        filters={filters}
-        onFilterChange={updateFilters}
-        onSearch={fetchProperties}
-        onReset={resetFilters}
+      {/* Role Navigation Bar (Portals for Search, Owners, Agents, Developers, Admins) */}
+      <RoleNavigation
+        activeTab={activePortal}
+        onSelectTab={setActivePortal}
+        pendingCount={pendingCount}
         lang={lang}
         t={t}
       />
 
-      <main className="main-container">
-        {/* Results Header */}
-        <div className="results-header">
-          <div>
-            <h2 className="results-count">
-              <span>{properties.length}</span> {filters.purpose === 'rent' ? t.resultsCountSuffixRent : t.resultsCountSuffixBuy} ({getCityDisplayName(filters.city)})
-            </h2>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.2rem' }}>
-              {t.resultsSubtitle}
-            </p>
-          </div>
+      {/* Main Content Router based on Active Role Portal */}
+      {activePortal === 'search' && (
+        <>
+          <HeroSearch
+            filters={filters}
+            onFilterChange={updateFilters}
+            onSearch={fetchProperties}
+            onReset={resetFilters}
+            lang={lang}
+            t={t}
+          />
 
-          <div className="filter-tags">
-            {filters.city && (
-              <span className="filter-tag">
-                {t.labelCity}: {getCityDisplayName(filters.city)}
-                <button onClick={() => updateFilters({ city: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-              </span>
-            )}
-            {filters.property_type && (
-              <span className="filter-tag">
-                {t.labelType}: {filters.property_type === 'flat' ? t.typeFlat : t.typeHouse}
-                <button onClick={() => updateFilters({ property_type: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-              </span>
-            )}
-            {filters.bhk && (
-              <span className="filter-tag">
-                {filters.bhk} {t.bedsCount}
-                <button onClick={() => updateFilters({ bhk: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-              </span>
-            )}
-            {(filters.min_price || filters.max_price) && (
-              <span className="filter-tag">
-                {t.labelBudget}
-                <button onClick={() => updateFilters({ min_price: null, max_price: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-              </span>
-            )}
-            {filters.search && (
-              <span className="filter-tag">
-                "{filters.search}"
-                <button onClick={() => updateFilters({ search: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-              </span>
+          <main className="main-container">
+            {/* Results Header */}
+            <div className="results-header">
+              <div>
+                <h2 className="results-count">
+                  <span>{properties.filter(p => p.status === 'approved').length}</span> {filters.purpose === 'rent' ? t.resultsCountSuffixRent : t.resultsCountSuffixBuy} ({getCityDisplayName(filters.city)})
+                </h2>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                  {t.resultsSubtitle}
+                </p>
+              </div>
+
+              <div className="filter-tags">
+                {filters.city && (
+                  <span className="filter-tag">
+                    {t.labelCity}: {getCityDisplayName(filters.city)}
+                    <button onClick={() => updateFilters({ city: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+                  </span>
+                )}
+                {filters.property_type && (
+                  <span className="filter-tag">
+                    {t.labelType}: {filters.property_type === 'flat' ? t.typeFlat : t.typeHouse}
+                    <button onClick={() => updateFilters({ property_type: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+                  </span>
+                )}
+                {filters.bhk && (
+                  <span className="filter-tag">
+                    {filters.bhk} {t.bedsCount}
+                    <button onClick={() => updateFilters({ bhk: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+                  </span>
+                )}
+                {(filters.min_price || filters.max_price) && (
+                  <span className="filter-tag">
+                    {t.labelBudget}
+                    <button onClick={() => updateFilters({ min_price: null, max_price: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+                  </span>
+                )}
+                {filters.search && (
+                  <span className="filter-tag">
+                    "{filters.search}"
+                    <button onClick={() => updateFilters({ search: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
+                  </span>
+                )}
+
+                {(filters.city || filters.property_type || filters.bhk || filters.min_price || filters.max_price || filters.search) && (
+                  <button className="btn-clear-filters" onClick={resetFilters}>
+                    {t.clearAllFilters}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Loading State */}
+            {loading && (
+              <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+                <RefreshCw size={36} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
+                <p style={{ marginTop: '1rem', color: '#64748b', fontWeight: 600 }}>
+                  {t.searching}
+                </p>
+              </div>
             )}
 
-            {(filters.city || filters.property_type || filters.bhk || filters.min_price || filters.max_price || filters.search) && (
-              <button className="btn-clear-filters" onClick={resetFilters}>
-                {t.clearAllFilters}
-              </button>
+            {/* Error State */}
+            {!loading && error && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '2rem', borderRadius: '12px', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
+                <AlertCircle size={40} color="#dc2626" style={{ margin: '0 auto 0.75rem' }} />
+                <h3 style={{ color: '#991b1b', fontWeight: 700 }}>Connection Notice</h3>
+                <p style={{ color: '#7f1d1d', marginTop: '0.4rem', fontSize: '0.9rem' }}>{error}</p>
+                <button
+                  onClick={fetchProperties}
+                  style={{ marginTop: '1rem', background: 'var(--primary)', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Retry Search
+                </button>
+              </div>
             )}
-          </div>
-        </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '5rem 0' }}>
-            <RefreshCw size={36} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '1rem', color: '#64748b', fontWeight: 600 }}>
-              {t.searching}
-            </p>
-          </div>
-        )}
+            {/* Properties Grid */}
+            {!loading && !error && properties.length > 0 && (
+              <div className="properties-grid">
+                {properties
+                  .filter(prop => prop.status === 'approved')
+                  .map((prop) => (
+                    <PropertyCard
+                      key={prop.id || prop._id}
+                      property={prop}
+                      isFavorite={favorites.some((f) => (f.id || f._id) === (prop.id || prop._id))}
+                      onToggleFavorite={toggleFavorite}
+                      onSelect={(p) => {
+                        setSelectedProperty(p);
+                        setInitialContactMode(false);
+                      }}
+                      onContact={(p) => {
+                        setSelectedProperty(p);
+                        setInitialContactMode(true);
+                      }}
+                      lang={lang}
+                      t={t}
+                    />
+                  ))}
+              </div>
+            )}
 
-        {/* Error State */}
-        {!loading && error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '2rem', borderRadius: '12px', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
-            <AlertCircle size={40} color="#dc2626" style={{ margin: '0 auto 0.75rem' }} />
-            <h3 style={{ color: '#991b1b', fontWeight: 700 }}>Connection Notice</h3>
-            <p style={{ color: '#7f1d1d', marginTop: '0.4rem', fontSize: '0.9rem' }}>{error}</p>
-            <button
-              onClick={fetchProperties}
-              style={{ marginTop: '1rem', background: 'var(--primary)', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
-            >
-              Retry Search
-            </button>
-          </div>
-        )}
+            {/* Empty State */}
+            {!loading && !error && properties.filter(p => p.status === 'approved').length === 0 && (
+              <div className="empty-state">
+                <div className="empty-state-icon">🏠</div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>
+                  {t.noPropertiesFound}
+                </h3>
+                <p style={{ color: '#64748b', maxWidth: '480px', margin: '0.5rem auto 1.5rem', fontSize: '0.95rem' }}>
+                  {t.noPropertiesDesc}
+                </p>
+                <button className="btn-search-main" style={{ maxWidth: '240px', margin: '0 auto' }} onClick={resetFilters}>
+                  {t.btnResetFilters}
+                </button>
+              </div>
+            )}
+          </main>
+        </>
+      )}
 
-        {/* Properties Grid */}
-        {!loading && !error && properties.length > 0 && (
-          <div className="properties-grid">
-            {properties.map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                isFavorite={favorites.some((f) => f.id === prop.id)}
-                onToggleFavorite={toggleFavorite}
-                onSelect={(p) => {
-                  setSelectedProperty(p);
-                  setInitialContactMode(false);
-                }}
-                onContact={(p) => {
-                  setSelectedProperty(p);
-                  setInitialContactMode(true);
-                }}
-                lang={lang}
-                t={t}
-              />
-            ))}
-          </div>
-        )}
+      {/* Property Owners Portal View */}
+      {activePortal === 'owners' && (
+        <OwnerPortal
+          properties={properties}
+          onAddProperty={handleAddProperty}
+          onDeleteProperty={handleDeleteProperty}
+          lang={lang}
+          t={t}
+          apiBase={API_BASE}
+        />
+      )}
 
-        {/* Empty State */}
-        {!loading && !error && properties.length === 0 && (
-          <div className="empty-state">
-            <div className="empty-state-icon">🏠</div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>
-              {t.noPropertiesFound}
-            </h3>
-            <p style={{ color: '#64748b', maxWidth: '480px', margin: '0.5rem auto 1.5rem', fontSize: '0.95rem' }}>
-              {t.noPropertiesDesc}
-            </p>
-            <button className="btn-search-main" style={{ maxWidth: '240px', margin: '0 auto' }} onClick={resetFilters}>
-              {t.btnResetFilters}
-            </button>
-          </div>
-        )}
-      </main>
+      {/* Agents & Brokers Portal View */}
+      {activePortal === 'agents' && (
+        <AgentPortal
+          properties={properties}
+          onAddProperty={handleAddProperty}
+          onDeleteProperty={handleDeleteProperty}
+          lang={lang}
+          t={t}
+          apiBase={API_BASE}
+        />
+      )}
+
+      {/* Builders & Developers Portal View */}
+      {activePortal === 'developers' && (
+        <DeveloperPortal
+          lang={lang}
+          t={t}
+          apiBase={API_BASE}
+        />
+      )}
+
+      {/* Platform Administrators Portal View */}
+      {activePortal === 'admin' && (
+        <AdminPortal
+          properties={properties}
+          onUpdateStatus={handleUpdateStatus}
+          onDeleteProperty={handleDeleteProperty}
+          lang={lang}
+          t={t}
+          apiBase={API_BASE}
+        />
+      )}
 
       {/* Property Details & Contact Modal */}
       {selectedProperty && (
