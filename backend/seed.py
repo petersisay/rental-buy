@@ -17,360 +17,519 @@ def seed_database():
     db.query(Property).delete()
     
     properties = [
-        # --- BANGALORE PROPERTIES ---
-        # 1. Bangalore - Buy - House
+        # =========================================================================
+        # --- ADDIS ABABA (አዲስ አበባ) PROPERTIES (10 Properties) ---
+        # =========================================================================
+        
+        # 1. Addis Ababa - Buy - House
         Property(
-            title="4 BHK Luxury Villa in Whitefield",
-            description="Experience ultimate luxury in this gorgeous 4 BHK independent villa. Located in the heart of Whitefield's tech corridor, this house offers an expansive private lawn, double-height ceilings, modular Italian kitchen, home automation, and 24/7 security. Perfect for families looking for elegance and privacy.",
-            city="Bangalore",
-            locality="Whitefield",
-            price=32000000.0,
-            price_formatted="₹3.2 Crore",
+            title="4 BHK Luxury G+2 Villa in Old Airport",
+            title_am="ባለ 4 መኝታ የቅንጦት ጂ+2 ቪላ በኦልድ ኤርፖርት",
+            description="Exquisite contemporary G+2 luxury villa situated in the diplomatic enclave of Old Airport, Addis Ababa. Features landscaped private garden, modern European kitchen, master bedroom with jacuzzi and walk-in closet, maid quarters, 3-phase backup generator, 10,000L water tanker, and CCTV security.",
+            description_am="በአዲስ አበባ ዲፕሎማቲክ ሰፈር ኦልድ ኤርፖርት የሚገኝ ውብ የዘመናዊ ጂ+2 ቪላ። ሰፊ የግል የአትክልት ስፍራ፣ የዘመናዊ አውሮፓውያን ሞጁላር ማብሰያ ቤት፣ ጃኩዚና ሰፊ ቁምሳጥን ያለው ዋና መኝታ ክፍል፣ የሰራተኛ ክፍል፣ የ3-ፌዝ ተጠባባቂ ጄኔሬተር፣ 10,000 ሊትር የውሃ ታንከር እና የCCTV ካሜራ ጥበቃ አለው።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Old Airport",
+            locality_am="ኦልድ ኤርፖርት",
+            price=85000000.0,
+            price_formatted="85,000,000 ETB",
+            price_formatted_am="85,000,000 ብር",
             purpose="buy",
             property_type="house",
             bhk=4,
-            bathrooms=4,
-            area=3500,
-            furnishing="Semi-Furnished",
+            bathrooms=5,
+            area=450,
+            furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
             image_url="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-            amenities="Private Garden, Gym, Swimming Pool, Home Automation, 24/7 Security, Power Backup"
-        ),
-        # 2. Bangalore - Buy - Flat
-        Property(
-            title="3 BHK Premium Apartment in Indiranagar",
-            description="Located in one of Bangalore's most vibrant residential zones, this premium 3 BHK flat features spacious balconies, VRV air conditioning, and top-tier finishes. Steps away from fine dining, cafes, and Metro.",
-            city="Bangalore",
-            locality="Indiranagar",
-            price=18500000.0,
-            price_formatted="₹1.85 Crore",
-            purpose="buy",
-            property_type="flat",
-            bhk=3,
-            bathrooms=3,
-            area=1800,
-            furnishing="Fully Furnished",
-            image_url="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-            amenities="Swimming Pool, Club House, Underground Parking, Gym, Elevators, Video Door Phone"
-        ),
-        # 3. Bangalore - Buy - Flat
-        Property(
-            title="2 BHK Modern Flat in HSR Layout",
-            description="Smartly designed 2 BHK apartment in Sector 3, HSR Layout. Excellent natural ventilation, modular kitchen, chimney, wardrobes in all rooms, and direct access to utility area. Ideal for young professionals.",
-            city="Bangalore",
-            locality="HSR Layout",
-            price=8500000.0,
-            price_formatted="₹85 Lakh",
-            purpose="buy",
-            property_type="flat",
-            bhk=2,
-            bathrooms=2,
-            area=1200,
-            furnishing="Semi-Furnished",
-            image_url="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-            amenities="Covered Parking, Power Backup, Security Guards, Rainwater Harvesting, Intercom"
-        ),
-        # 4. Bangalore - Buy - House
-        Property(
-            title="3 BHK Independent House in Koramangala",
-            description="Spacious independent house located in a quiet tree-lined lane of Koramangala 4th Block. The property features a private terrace, private car park garage, and beautiful vaastu-compliant layout.",
-            city="Bangalore",
-            locality="Koramangala",
-            price=21000000.0,
-            price_formatted="₹2.1 Crore",
-            purpose="buy",
-            property_type="house",
-            bhk=3,
-            bathrooms=3,
-            area=2200,
-            furnishing="Unfurnished",
-            image_url="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=800&q=80",
-            amenities="Private Terrace, Garage, Borewell Water, Pet Friendly, Utility Room"
-        ),
-        # 5. Bangalore - Buy - Flat
-        Property(
-            title="1 BHK Smart Studio Flat in Electronic City",
-            description="Compact and stylish studio apartment in Phase 1, Electronic City. Comes fully furnished with modern appliances, space-saving furniture, and high-speed fiber-optic cabling. High rental yield.",
-            city="Bangalore",
-            locality="Electronic City",
-            price=4200000.0,
-            price_formatted="₹42 Lakh",
-            purpose="buy",
-            property_type="flat",
-            bhk=1,
-            bathrooms=1,
-            area=650,
-            furnishing="Fully Furnished",
-            image_url="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-            amenities="Rooftop Gym, Coworking Lounge, Laundry Facility, 24/7 Security, High Speed Elevator"
-        ),
-        # 6. Bangalore - Rent - Flat
-        Property(
-            title="3 BHK Highrise Apartment in Hebbal",
-            description="Stunning 3 BHK apartment on the 18th floor offering views of the Hebbal Lake. Features central gas line connection, massive master suite with walk-in closet, and modern light fixtures.",
-            city="Bangalore",
-            locality="Hebbal",
-            price=55000.0,
-            price_formatted="₹55,000/month",
-            purpose="rent",
-            property_type="flat",
-            bhk=3,
-            bathrooms=3,
-            area=1650,
-            furnishing="Semi-Furnished",
-            image_url="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-            amenities="Lake View, Tennis Court, Clubhouse, Swimming Pool, Piped Gas, Basement Parking"
-        ),
-        # 7. Bangalore - Rent - House
-        Property(
-            title="3 BHK Independent Villa on Sarjapur Road",
-            description="Fabulous gated community villa with high ceilings and marble flooring. Features a small front garden, backyard sit-out space, and solar water heating. Peaceful living away from traffic.",
-            city="Bangalore",
-            locality="Sarjapur Road",
-            price=75000.0,
-            price_formatted="₹75,000/month",
-            purpose="rent",
-            property_type="house",
-            bhk=3,
-            bathrooms=3,
-            area=2400,
-            furnishing="Semi-Furnished",
-            image_url="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-            amenities="Gated Community, Children's Play Area, Club House, Solar Water Heater, 2 Car Parking"
-        ),
-        # 8. Bangalore - Rent - Flat
-        Property(
-            title="2 BHK Cozy Flat near Marathahalli Bridge",
-            description="Perfect for IT professionals working in Outer Ring Road tech parks. Well-lit rooms, close to bus stops, supermarkets, and schools. Secure residential community.",
-            city="Bangalore",
-            locality="Marathahalli",
-            price=32000.0,
-            price_formatted="₹32,000/month",
-            purpose="rent",
-            property_type="flat",
-            bhk=2,
-            bathrooms=2,
-            area=1100,
-            furnishing="Unfurnished",
-            image_url="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
-            amenities="24/7 Water Supply, Security Guard, Power Backup, Elevator, Two-wheeler Parking"
-        ),
-        # 9. Bangalore - Rent - Flat
-        Property(
-            title="1 BHK Penthouse Studio in Indiranagar",
-            description="Exclusive rooftop penthouse studio with an expansive private terrace. Fully equipped kitchenette, modern bathroom, and tasteful furniture. Ultimate bachelor pad in Bangalore.",
-            city="Bangalore",
-            locality="Indiranagar",
-            price=25000.0,
-            price_formatted="₹25,000/month",
-            purpose="rent",
-            property_type="flat",
-            bhk=1,
-            bathrooms=1,
-            area=700,
-            furnishing="Fully Furnished",
-            image_url="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&w=800&q=80",
-            amenities="Private Terrace, Smart TV, Wi-Fi Included, Washing Machine, AC, Power Backup"
-        ),
-        # 10. Bangalore - Rent - House
-        Property(
-            title="4 BHK Luxury House in Benson Town",
-            description="Colonial-style independent heritage bungalow modernized with premium fittings. Features a massive wrap-around balcony, wooden flooring in the bedrooms, servant quarters, and huge lawns.",
-            city="Bangalore",
-            locality="Benson Town",
-            price=120000.0,
-            price_formatted="₹1.2 Lakh/month",
-            purpose="rent",
-            property_type="house",
-            bhk=4,
-            bathrooms=4,
-            area=3200,
-            furnishing="Fully Furnished",
-            image_url="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80",
-            amenities="Huge Lawn, Servant Quarters, Wooden Flooring, Modern Bathrooms, CCTV Security"
+            amenities="Backup Generator, 10000L Water Tank, Private Garden, Maid Quarters, CCTV Security, 4 Car Parking",
+            amenities_am="ተጠባባቂ ጄኔሬተር, 10000 ሊ የውሃ ታንከር, የግል ጊቢ, የሰራተኛ ክፍል, CCTV ጥበቃ, 4 መኪና ማቆሚያ"
         ),
 
-        # --- MUMBAI PROPERTIES ---
-        # 11. Mumbai - Buy - Flat
+        # 2. Addis Ababa - Buy - Flat
         Property(
-            title="3 BHK Sea-Facing Apartment in Bandra West",
-            description="Unobstructed views of the Arabian Sea from this luxury Bandra apartment. Premium Italian marble floors, floor-to-ceiling double-glazed windows, concierge services, and top-tier security systems.",
-            city="Mumbai",
-            locality="Bandra West",
-            price=75000000.0,
-            price_formatted="₹7.5 Crore",
+            title="3 BHK High-End Apartment in Bole Medhanialem",
+            title_am="ባለ 3 መኝታ ቅንጦት አፓርታማ በቦሌ መድኃኔዓለም",
+            description="Prestigious 3-bedroom apartment located in prime Bole near Medhanialem. Enjoy stunning city views, elevator access, backup generator, underground parking, integrated kitchen appliances, and 24/7 security.",
+            description_am="በተመራጩ የቦሌ መድኃኔዓለም አካባቢ የሚገኝ ደረጃውን የጠበቀ ባለ 3 መኝታ አፓርታማ። ማራኪ የከተማ እይታ፣ ዘመናዊ ሊፍት፣ ተጠባባቂ ጄኔሬተር፣ የመሬት ውስጥ የመኪና ማቆሚያ፣ የተሟላ ዘመናዊ የኩሽና እቃዎች እና የ24/7 ጥበቃ ያካተተ።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Bole",
+            locality_am="ቦሌ",
+            price=32000000.0,
+            price_formatted="32,000,000 ETB",
+            price_formatted_am="32,000,000 ብር",
             purpose="buy",
             property_type="flat",
             bhk=3,
             bathrooms=3,
-            area=1900,
-            furnishing="Fully Furnished",
+            area=190,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
             image_url="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-            amenities="Sea View, Concierge, Gym, Valet Parking, Private Elevator, Smart Security"
+            amenities="Automatic Elevator, Standby Generator, Underground Parking, Water Reservoir, Intercom, Security",
+            amenities_am="ዘመናዊ ሊፍት, ተጠባባቂ ጄኔሬተር, የምድር ውስጥ ማቆሚያ, የውሃ ማጠራቀሚያ, ኢንተርኮም, አስተማማኝ ጥበቃ"
         ),
-        # 12. Mumbai - Buy - Flat
+
+        # 3. Addis Ababa - Buy - Flat
         Property(
-            title="2 BHK Premium Flat in Andheri West",
-            description="Located in a gated township, this modern 2 BHK flat features modular wardrobes, pipeline gas connection, high-speed elevators, and a luxurious clubhouse lobby. Excellent connectivity to metro and highway.",
-            city="Mumbai",
-            locality="Andheri West",
-            price=24000000.0,
-            price_formatted="₹2.4 Crore",
+            title="2 BHK Modern Flat in Kazanchis Financial District",
+            title_am="ባለ 2 መኝታ ዘመናዊ አፓርታማ በካዛንቺስ",
+            description="Conveniently situated in the bustling Kazanchis financial hub, steps from UNECA and Intercontinental. Ideal for corporate professionals and high-yield rental investments. Features balcony, fitted wardrobes, and gym facilities.",
+            description_am="በካዛንቺስ የንግድና የፋይናንስ ማዕከል ከኢኮኖሚክ ኮሚሽን (UNECA) አጠገብ የሚገኝ ምቹ ባለ 2 መኝታ አፓርታማ። ለባለሙያዎች እና ለኪራይ ገቢ ኢንቨስትመንት እጅግ ተመራጭ። ሰፊ በረንዳ፣ ቁምሳጥንና የጅምናዚየም አገልግሎት ያለው።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Kazanchis",
+            locality_am="ካዛንቺስ",
+            price=21500000.0,
+            price_formatted="21,500,000 ETB",
+            price_formatted_am="21,500,000 ብር",
             purpose="buy",
             property_type="flat",
             bhk=2,
             bathrooms=2,
-            area=1100,
-            furnishing="Semi-Furnished",
+            area=125,
+            furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
             image_url="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-            amenities="Clubhouse, Mini Theatre, Gated Entry, Jogging Track, Children's Pool, Piped Gas"
+            amenities="Gymnasium, Backup Power, Reserved Parking, Balcony View, Fire Protection",
+            amenities_am="ጅምናዚየም, ተጠባባቂ መብራት, የተመደበ ማቆሚያ, የበረንዳ እይታ, የእሳት መከላከያ"
         ),
-        # 13. Mumbai - Buy - House
+
+        # 4. Addis Ababa - Buy - House
         Property(
-            title="4 BHK Luxury Bungalow in Juhu",
-            description="Stunning 4 BHK independent bungalow situated in the elite residential neighborhood of Juhu. Features a private pool, indoor home elevator, basement parking for 3 cars, and premium wood accents throughout.",
-            city="Mumbai",
-            locality="Juhu",
-            price=120000000.0,
-            price_formatted="₹12 Crore",
+            title="3 BHK Independent Townhouse in CMC Tsehay Real Estate",
+            title_am="ባለ 3 መኝታ ቪላ ቤት በሲኤምሲ ፀሐይ ሪል እስቴት",
+            description="Elegant 3-bedroom family townhouse in the serene, gated community of CMC. Includes private front compound, sunny terrace, solar water heater, modern bathroom tiles, and 24-hour guarded gate.",
+            description_am="በሲኤምሲ ፀሐይ ሪል እስቴት አስተማማኝ ቅጥር ግቢ ውስጥ የሚገኝ ድንቅ ባለ 3 መኝታ ቤት። የፊት ጊቢ፣ ፀሐያማ ሰገነት፣ የፀሐይ ውሃ ማሞቂያ፣ ዘመናዊ መታጠቢያ ቤቶች እና የ24 ሰዓት የበር ጥበቃ ያለው።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="CMC",
+            locality_am="ሲኤምሲ",
+            price=46000000.0,
+            price_formatted="46,000,000 ETB",
+            price_formatted_am="46,000,000 ብር",
             purpose="buy",
+            property_type="house",
+            bhk=3,
+            bathrooms=3,
+            area=280,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=800&q=80",
+            amenities="Gated Security, Private Yard, Solar Water Heater, Water Reservoir, Parking for 2 Cars",
+            amenities_am="የተከበረ ጊቢ, የግል ግቢ, የፀሐይ ውሃ ማሞቂያ, የውሃ ታንከር, 2 መኪና ማቆሚያ"
+        ),
+
+        # 5. Addis Ababa - Buy - Flat
+        Property(
+            title="1 BHK Cozy Flat in Ayat Sub-City",
+            title_am="ባለ 1 መኝታ ምቹ አፓርታማ በአያት",
+            description="Affordable and neat 1-bedroom flat close to Ayat Light Rail Station. Perfect starter home or bachelor residence with open kitchen layout, water reservoir access, and low service fee.",
+            description_am="በአያት ቀላል ባቡር ጣቢያ አቅራቢያ የሚገኝ ተመጣጣኝና ንፁህ ባለ 1 መኝታ አፓርታማ። ክፍት የአሜሪካን ኩሽና፣ አስተማማኝ የውሃ ማጠራቀሚያ እና አነስተኛ የአገልግሎት ክፍያ ያለው።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Ayat",
+            locality_am="አያት",
+            price=9800000.0,
+            price_formatted="9,800,000 ETB",
+            price_formatted_am="9,800,000 ብር",
+            purpose="buy",
+            property_type="flat",
+            bhk=1,
+            bathrooms=1,
+            area=70,
+            furnishing="Unfurnished",
+            furnishing_am="ያልተሟላ እቃ",
+            image_url="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+            amenities="Near LRT Station, Water Reservoir, Security, Balcony, Secure Parking",
+            amenities_am="በባቡር ጣቢያ አቅራቢያ, የውሃ ማጠራቀሚያ, አስተማማኝ ጥበቃ, በረንዳ, የተጠበቀ ማቆሚያ"
+        ),
+
+        # 6. Addis Ababa - Rent - Flat
+        Property(
+            title="3 BHK Luxury Furnished Flat in Sarbet (Near AU)",
+            title_am="ባለ 3 መኝታ የቅንጦት የተሟላ አፓርታማ በሳርቤት (አፍሪካ ህብረት አጠገብ)",
+            description="Spacious high-floor apartment overlooking the African Union Headquarters and South Addis. Features plush leather sofas, smart TV, washing machine, standby generator, and elevator.",
+            description_am="በሳርቤት ከአፍሪካ ህብረት ዋና መ/ቤት አቅራቢያ የሚገኝ ማራኪ ባለ 3 መኝታ አፓርታማ። ምቹ የሳሎን እቃዎች፣ ስማርት ቲቪ፣ ዘመናዊ የልብስ ማጠቢያ፣ ጄኔሬተርና ሊፍት የተሟላለት።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Sarbet",
+            locality_am="ሳርቤት",
+            price=140000.0,
+            price_formatted="140,000 ETB/month",
+            price_formatted_am="140,000 ብር/ወር",
+            purpose="rent",
+            property_type="flat",
+            bhk=3,
+            bathrooms=2,
+            area=175,
+            furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+            amenities="City Views, High Speed Lift, Full Generator Backup, Wi-Fi Ready, 24/7 Guards",
+            amenities_am="የከተማ እይታ, ፈጣን ሊፍት, ሙሉ ጄኔሬተር, ዋይፋይ የተዘጋጀ, 24/7 ጥበቃ"
+        ),
+
+        # 7. Addis Ababa - Rent - House
+        Property(
+            title="4 BHK Spacious Residential Villa in Summit",
+            title_am="ባለ 4 መኝታ ሰፊ የመኖሪያ ቪላ በሰሚት",
+            description="Stand-alone two-story residential house in a peaceful Summit neighborhood. Includes green front lawn, traditional coffee area, guardroom, service quarter, and large water storage.",
+            description_am="በሰሚት ፀጥታ የሰፈነበት አካባቢ የሚገኝ ባለ 4 መኝታ ባለ ሁለት ፎቅ ቪላ። ሳር የተከለለበት ጊቢ፣ የባህል ቡና ማፍያ ቦታ፣ የጥበቃ ክፍል፣ የሰራተኛ ማረፊያ እና ትልቅ የውሃ ማጠራቀሚያ ታንከር ያለው።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Summit",
+            locality_am="ሰሚት",
+            price=95000.0,
+            price_formatted="95,000 ETB/month",
+            price_formatted_am="95,000 ብር/ወር",
+            purpose="rent",
             property_type="house",
             bhk=4,
-            bathrooms=4,
-            area=4000,
-            furnishing="Fully Furnished",
-            image_url="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-            amenities="Private Pool, Home Lift, High ceilings, Basement Garage, Servant Rooms, Terrace Garden"
-        ),
-        # 14. Mumbai - Buy - Flat
-        Property(
-            title="3 BHK Sky Condominium in Worli",
-            description="Luxurious apartment located in a iconic skyscraper in Worli. Enjoy 360-degree views of the Mumbai skyline and Sea Link. Fully loaded building with world-class wellness spa and indoor pool.",
-            city="Mumbai",
-            locality="Worli",
-            price=68000000.0,
-            price_formatted="₹6.8 Crore",
-            purpose="buy",
-            property_type="flat",
-            bhk=3,
             bathrooms=3,
-            area=1750,
+            area=320,
             furnishing="Semi-Furnished",
-            image_url="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-            amenities="Sky Lounge, Spa & Sauna, Infinity Pool, Squash Courts, Helipad, Multi-tier Security"
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+            amenities="Spacious Garden, Traditional Kitchen, Service Room, 3 Car Compound, Water Pump",
+            amenities_am="ሰፊ የአትክልት ስፍራ, የባህል ኩሽና, የሰራተኛ ክፍል, ለ3 መኪና የሚሆን ግቢ, የውሃ ፓምፕ"
         ),
-        # 15. Mumbai - Buy - House
+
+        # 8. Addis Ababa - Rent - Flat
         Property(
-            title="3 BHK Luxury Row House in Powai",
-            description="A rare find in Mumbai: a beautiful row house with a private front porch and backyard garden. Located in Hiranandani Powai, this property offers serene hill views and peaceful neighborhood vibes.",
-            city="Mumbai",
-            locality="Powai",
-            price=45000000.0,
-            price_formatted="₹4.5 Crore",
-            purpose="buy",
-            property_type="house",
-            bhk=3,
-            bathrooms=3,
-            area=2100,
-            furnishing="Unfurnished",
-            image_url="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=800&q=80",
-            amenities="Row House Layout, Private Garden, Rooftop Deck, 24/7 Water, Covered Car Park"
-        ),
-        # 16. Mumbai - Rent - Flat
-        Property(
-            title="2 BHK Furnished Flat in Powai",
-            description="Tastefully designed 2 BHK flat overlooking the Powai lake. It is loaded with modular appliances, custom beds and sofas, and automated lighting. Ready to move in.",
-            city="Mumbai",
-            locality="Powai",
+            title="2 BHK Cozy Flat in Bole Atlas",
+            title_am="ባለ 2 መኝታ ምቹ አፓርታማ በቦሌ አትላስ",
+            description="Convenient 2-bedroom rental apartment steps away from hotels, restaurants, and shopping centers in Bole Atlas. Equipped with modern kitchen cabinets, backup generator, and elevator.",
+            description_am="በቦሌ አትላስ ከሆቴሎችና ሬስቶራንቶች አቅራቢያ የሚገኝ ተወዳጅ ባለ 2 መኝታ የኪራይ አፓርታማ። ዘመናዊ የኩሽና ካቢኔት፣ ተጠባባቂ ጄኔሬተር እና ሊፍት ያለው።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Bole",
+            locality_am="ቦሌ",
             price=65000.0,
-            price_formatted="₹65,000/month",
+            price_formatted="65,000 ETB/month",
+            price_formatted_am="65,000 ብር/ወር",
             purpose="rent",
             property_type="flat",
             bhk=2,
             bathrooms=2,
-            area=980,
+            area=115,
             furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
             image_url="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
-            amenities="Lake View, Automated Lights, Intercom, Swimming Pool, Gym, Piped Gas"
+            amenities="Central Location, Elevator, Backup Power, Balcony, Secure Entry",
+            amenities_am="መሀል ከተማ, ዘመናዊ ሊፍት, ጄኔሬተር, በረንዳ, የተጠበቀ መግቢያ"
         ),
-        # 17. Mumbai - Rent - Flat
+
+        # 9. Addis Ababa - Rent - Flat
         Property(
-            title="3 BHK Luxury Flat at Worli Sea Face",
-            description="Gaze at the sunset over the sea link from your private balcony. This 3 BHK flat offers double-height lounge area, marble flooring, and customized walk-in wardrobe. Fully air-conditioned.",
-            city="Mumbai",
-            locality="Worli",
-            price=180000.0,
-            price_formatted="₹1.8 Lakh/month",
-            purpose="rent",
-            property_type="flat",
-            bhk=3,
-            bathrooms=3,
-            area=1600,
-            furnishing="Fully Furnished",
-            image_url="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&w=800&q=80",
-            amenities="Sea Face, Balcony, Central AC, Italian Marble, Home Cinema System, 2 Car Parks"
-        ),
-        # 18. Mumbai - Rent - House
-        Property(
-            title="3 BHK Independent House in Chembur",
-            description="Well-maintained 3 BHK independent house in a secure gated enclave. Features a parking port, overhead water tanks with automatic pumps, and modular cupboards in all bedrooms.",
-            city="Mumbai",
-            locality="Chembur",
-            price=9000.0,  # Wait, 90,000/month -> 90000.0
-            price_formatted="₹90,000/month",
-            purpose="rent",
-            property_type="house",
-            bhk=3,
-            bathrooms=3,
-            area=1800,
-            furnishing="Semi-Furnished",
-            image_url="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-            amenities="Independent Parking, Gated Community, 24/7 Water Supply, Terrace Access"
-        ),
-        # 19. Mumbai - Rent - Flat
-        Property(
-            title="1 BHK Cozy Apartment in Malad West",
-            description="Excellent option for small families or working singles. Quiet society, minutes away from the link road and metro station. Piped gas connection and safety grill on windows.",
-            city="Mumbai",
-            locality="Malad West",
-            price=28000.0,
-            price_formatted="₹28,000/month",
+            title="1 BHK Studio Apartment in Gerji",
+            title_am="ባለ 1 መኝታ ስቱዲዮ አፓርታማ በገርጂ",
+            description="Bright and modern 1-bedroom studio in Gerji Mebrat Hail. Offers water tank supply, security guard, parking space, and easy access to transportation.",
+            description_am="በገርጂ መብራት ኃይል የሚገኝ ፀሐያማና ዘመናዊ ባለ 1 መኝታ ስቱዲዮ አፓርታማ። አስተማማኝ የውሃ አቅርቦት፣ የጥበቃ አገልግሎት፣ የመኪና ማቆሚያ እና ለትራንስፖርት ምቹ።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Gerji",
+            locality_am="ገርጂ",
+            price=35000.0,
+            price_formatted="35,000 ETB/month",
+            price_formatted_am="35,000 ብር/ወር",
             purpose="rent",
             property_type="flat",
             bhk=1,
             bathrooms=1,
-            area=550,
-            furnishing="Unfurnished",
-            image_url="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-            amenities="Piped Gas, Near Metro, Elevator, Intercom Security, CCTV"
+            area=65,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&w=800&q=80",
+            amenities="Water Tank, 24/7 Guard, Balcony, Parking, Easy Transport Access",
+            amenities_am="የውሃ ታንከር, 24/7 ጥበቃ, በረንዳ, መኪና ማቆሚያ, የትራንስፖርት አማራጭ"
         ),
-        # 20. Mumbai - Rent - House
+
+        # 10. Addis Ababa - Rent - House
         Property(
-            title="5 BHK Sea-View Mansion in Bandra West",
-            description="Stunning multi-level luxury house directly overlooking the sea in Carter Road, Bandra. Features an expansive terrace deck, smart elevator, high-security command post, private gym area, and lush green compound.",
-            city="Mumbai",
-            locality="Bandra West",
-            price=450000.0,
-            price_formatted="₹4.5 Lakh/month",
+            title="5 BHK Diplomatic Residence in Lebu Varnero",
+            title_am="ባለ 5 መኝታ የዲፕሎማት መኖሪያ ቪላ በሌቡ ቫርኔሮ",
+            description="Magnificent high-security 5-bedroom residence in the exclusive Lebu Varnero gated community. Features wooden floors, double-height living room, private tennis court access, large manicured garden, and staff quarters.",
+            description_am="በሌቡ ቫርኔሮ ዝግ ማህበረሰብ ውስጥ የሚገኝ ድንቅ ባለ 5 መኝታ ከፍተኛ ጥበቃ ያለው ቪላ። የወለል ፓርኬት፣ ባለ ሁለት ፎቅ ከፍታ ያለው ሰፊ ሳሎን፣ የቴኒስ ሜዳ፣ ያማረ የጓሮ አትክልትና የሰራተኞች ማረፊያ ያካተተ።",
+            city="Addis Ababa",
+            city_am="አዲስ አበባ",
+            locality="Lebu",
+            locality_am="ሌቡ",
+            price=220000.0,
+            price_formatted="220,000 ETB/month",
+            price_formatted_am="220,000 ብር/ወር",
             purpose="rent",
             property_type="house",
             bhk=5,
             bathrooms=5,
-            area=4800,
+            area=500,
             furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
             image_url="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80",
-            amenities="Direct Sea View, Private Lift, Terrace Lounge, Private Gym room, Guard House, Piped Gas"
+            amenities="Security Post, Manicured Lawn, Staff Quarters, Solar Heating, High-capacity Generator",
+            amenities_am="የጥበቃ ፖስት, ያማረ ሳር ግቢ, የሰራተኛ ማረፊያ, የፀሐይ ማሞቂያ, ከፍተኛ ጄኔሬተር"
+        ),
+
+        # =========================================================================
+        # --- ADAMA (አዳማ / ናዝሬት) PROPERTIES (10 Properties) ---
+        # =========================================================================
+
+        # 11. Adama - Buy - House
+        Property(
+            title="4 BHK Luxury G+1 Villa in Bole Sub-City, Adama",
+            title_am="ባለ 4 መኝታ ዘመናዊ ጂ+1 ቪላ በአዳማ ቦሌ ክፍለ ከተማ",
+            description="Spectacular G+1 independent villa in Adama's Bole residential sector. Highlights include stone-paved compound, modern salon, balcony with views of Mount Boku, standby generator, and private water borehole.",
+            description_am="በአዳማ ቦሌ ሰፈር የሚገኝ ማራኪ ባለ 4 መኝታ ጂ+1 ቪላ። በድንጋይ ያማረ ቅጥር ግቢ፣ ሰፊ ሳሎን፣ የቦኩ ተራራ እይታ ያለው ሰገነት፣ ተጠባባቂ ጄኔሬተር እና የግል የቦርቧ ውሃ አቅርቦት ያለው።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Bole Sub-City",
+            locality_am="ቦሌ ክፍለ ከተማ",
+            price=24000000.0,
+            price_formatted="24,000,000 ETB",
+            price_formatted_am="24,000,000 ብር",
+            purpose="buy",
+            property_type="house",
+            bhk=4,
+            bathrooms=4,
+            area=350,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+            amenities="Borehole Water, Standby Power, Balcony Mountain Views, 3 Car Parking, Perimeter Fence",
+            amenities_am="የቦርቧ ውሃ, ተጠባባቂ መብራት, የተራራ እይታ ሰገነት, 3 መኪና ማቆሚያ, ጠንካራ አጥር"
+        ),
+
+        # 12. Adama - Buy - Flat
+        Property(
+            title="3 BHK Modern Flat in Dembela, Central Adama",
+            title_am="ባለ 3 መኝታ አዲስ አፓርታማ በደምበላ አዳማ",
+            description="Brand-new 3-bedroom apartment on the 4th floor of a prestigious mixed-use building in Dembela. Comes with ceramic tiling, elevator, underground water reservoir, and prime commercial proximity.",
+            description_am="በደምበላ መሀል ከተማ በ4ኛ ፎቅ ላይ የሚገኝ አዲስ ባለ 3 መኝታ አፓርታማ። የሴራሚክ ወለል፣ ዘመናዊ ሊፍት፣ የመሬት ውስጥ የውሃ ማጠራቀሚያ እና ለገበያ ማዕከላት ቅርብ።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Dembela",
+            locality_am="ደምበላ",
+            price=14500000.0,
+            price_formatted="14,500,000 ETB",
+            price_formatted_am="14,500,000 ብር",
+            purpose="buy",
+            property_type="flat",
+            bhk=3,
+            bathrooms=2,
+            area=150,
+            furnishing="Unfurnished",
+            furnishing_am="ያልተሟላ እቃ",
+            image_url="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+            amenities="Elevator, Commercial Hub Access, Water Reservoir, Balcony, Secure Basement Parking",
+            amenities_am="ሊፍት, ለንግድ ማዕከል ቅርብ, የውሃ ማጠራቀሚያ, በረንዳ, የተጠበቀ ምድር ማቆሚያ"
+        ),
+
+        # 13. Adama - Buy - Flat
+        Property(
+            title="2 BHK Stylish Apartment in Posta Bet Area",
+            title_am="ባለ 2 መኝታ ቅንጡ አፓርታማ በፖስታ ቤት አካባቢ",
+            description="Nicely finished 2-bedroom condominium flat in the heart of Adama Posta Bet. High-speed internet connection ready, continuous water supply, and sunny living space.",
+            description_am="በአዳማ ፖስታ ቤት አካባቢ የሚገኝ ጥራት ባለው አጨራረስ የተሰራ ባለ 2 መኝታ ኮንዶሚኒየም አፓርታማ። የፈጣን ኢንተርኔት መስመር የተዘረጋለት፣ አስተማማኝ የውሃ አቅርቦት እና ፀሐያማ ሳሎን።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Posta Bet",
+            locality_am="ፖስታ ቤት",
+            price=8900000.0,
+            price_formatted="8,900,000 ETB",
+            price_formatted_am="8,900,000 ብር",
+            purpose="buy",
+            property_type="flat",
+            bhk=2,
+            bathrooms=2,
+            area=105,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
+            amenities="Central Location, Water Tank, CCTV, Tiled Flooring, Safe Gated Entrance",
+            amenities_am="መሀል ከተማ, የውሃ ታንከር, የCCTV ካሜራ, የሴራሚክ ወለል, የተጠበቀ በር"
+        ),
+
+        # 14. Adama - Buy - House
+        Property(
+            title="3 BHK Standalone House near Wonji Road",
+            title_am="ባለ 3 መኝታ ራሱን የቻለ ቤት በወንጂ መንገድ አዳማ",
+            description="Spacious standalone family home situated just off Wonji Road. Features wide paved driveway, mature fruit trees (mango and avocado), separate store room, and perimeter wall.",
+            description_am="በወንጂ መንገድ አቅራቢያ የሚገኝ ሰፊ ራሱን የቻለ የቤተሰብ መኖሪያ ቤት። ሰፊ ኮብልስቶን የተነጠፈበት ጊቢ፣ የማንጎ እና የአቮካዶ ዛፎች፣ ጓዳ እና ዙሪያውን የታጠረ ጠንካራ አጥር።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Wonji Road",
+            locality_am="ወንጂ መንገድ",
+            price=17500000.0,
+            price_formatted="17,500,000 ETB",
+            price_formatted_am="17,500,000 ብር",
+            purpose="buy",
+            property_type="house",
+            bhk=3,
+            bathrooms=2,
+            area=300,
+            furnishing="Unfurnished",
+            furnishing_am="ያልተሟላ እቃ",
+            image_url="https://images.unsplash.com/photo-1512915922686-57c11dde9b6b?auto=format&fit=crop&w=800&q=80",
+            amenities="Fruit Trees, Storage Room, High Security Wall, Large Compound, Ample Parking",
+            amenities_am="የፍራፍሬ ዛፎች, የእቃ ማከማቻ, ረጅም አጥር, ሰፊ ግቢ, የመኪና ማቆሚያ"
+        ),
+
+        # 15. Adama - Buy - Flat
+        Property(
+            title="1 BHK Starter Flat in Boku Hillside",
+            title_am="ባለ 1 መኝታ ተመጣጣኝ አፓርታማ በቦኩ",
+            description="Great investment or first-time home buyer opportunity. 1-bedroom flat offering fresh Rift Valley breeze, modern bathroom, and secure society gate.",
+            description_am="ለጀማሪ ገዢዎች ወይም ለኢንቨስትመንት ተስማሚ የሆነ ባለ 1 መኝታ አፓርታማ። ንፁህ የስምጥ ሸለቆ አየር፣ ዘመናዊ መታጠቢያ ቤት እና አስተማማኝ ጥበቃ ያለው።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Boku",
+            locality_am="ቦኩ",
+            price=5400000.0,
+            price_formatted="5,400,000 ETB",
+            price_formatted_am="5,400,000 ብር",
+            purpose="buy",
+            property_type="flat",
+            bhk=1,
+            bathrooms=1,
+            area=60,
+            furnishing="Unfurnished",
+            furnishing_am="ያልተሟላ እቃ",
+            image_url="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+            amenities="Breezy Hillside, Guarded Entrance, Water Tank, Low Maintenance",
+            amenities_am="ንፁህ አየር, የተጠበቀ በር, የውሃ ታንከር, አነስተኛ ወጪ"
+        ),
+
+        # 16. Adama - Rent - Flat
+        Property(
+            title="2 BHK Furnished Flat in Central Adama (Near Ras Hotel)",
+            title_am="ባለ 2 መኝታ የተሟላ አፓርታማ በመሀል አዳማ (ራስ ሆቴል አጠገብ)",
+            description="Comfortable fully furnished flat with living room sofas, dining table, flat-screen TV, modern kitchen appliances, and 24/7 security guard.",
+            description_am="በአዳማ መሀል ከተማ ከራስ ሆቴል አጠገብ የሚገኝ ምቹና ሙሉ እቃ የተሟላለት አፓርታማ። የሳሎን ሶፋዎች፣ የመመገቢያ ጠረጴዛ፣ ፍላት ቲቪ፣ ዘመናዊ ኩሽና እና የ24/7 ጥበቃ።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Central Adama",
+            locality_am="መሀል አዳማ",
+            price=38000.0,
+            price_formatted="38,000 ETB/month",
+            price_formatted_am="38,000 ብር/ወር",
+            purpose="rent",
+            property_type="flat",
+            bhk=2,
+            bathrooms=2,
+            area=95,
+            furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80",
+            amenities="Fully Furnished, Smart TV, Water Tanker, Security, City Center Access",
+            amenities_am="ሙሉ እቃ የተሟላለት, ስማርት ቲቪ, የውሃ ታንከር, አስተማማኝ ጥበቃ, መሀል ከተማ"
+        ),
+
+        # 17. Adama - Rent - Flat
+        Property(
+            title="3 BHK Spacious Flat in Migira Residential Zone",
+            title_am="ባለ 3 መኝታ ሰፊ አፓርታማ በሚጊራ ሰፈር አዳማ",
+            description="Bright 3-bedroom flat in a family-friendly complex in Migira. Offers spacious bedrooms, built-in closets, water pump, and dedicated parking.",
+            description_am="በሚጊራ ሰፈር ለቤተሰብ ምቹ በሆነ ህንፃ ውስጥ የሚገኝ ብሩህ ባለ 3 መኝታ አፓርታማ። ሰፋፊ መኝታ ክፍሎች፣ ቁምሳጥን፣ የውሃ ፓምፕ እና የግል መኪና ማቆሚያ ያለው።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Migira",
+            locality_am="ሚጊራ",
+            price=48000.0,
+            price_formatted="48,000 ETB/month",
+            price_formatted_am="48,000 ብር/ወር",
+            purpose="rent",
+            property_type="flat",
+            bhk=3,
+            bathrooms=2,
+            area=140,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+            amenities="Spacious Rooms, Balcony, Water Pump, Gated Society, Parking",
+            amenities_am="ሰፋፊ ክፍሎች, በረንዳ, የውሃ ፓምፕ, የተከለለ ጊቢ, መኪና ማቆሚያ"
+        ),
+
+        # 18. Adama - Rent - House
+        Property(
+            title="3 BHK Independent Villa in Geda Residential Enclave",
+            title_am="ባለ 3 መኝታ ቪላ ቤት በገዳ ሰፈር አዳማ",
+            description="Charming 3-bedroom single-family house located in quiet Geda. Features large shaded veranda, flower garden, separate servant room, and 2-car compound.",
+            description_am="በገዳ ሰፈር ፀጥታ ባለው አካባቢ የሚገኝ ድንቅ ባለ 3 መኝታ ቪላ። ሰፊ ጥላ ያለው በረንዳ፣ ያማረ የአበባ አትክልት፣ የሰራተኛ ክፍል እና ለ2 መኪና የሚሆን ጊቢ።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Geda",
+            locality_am="ገዳ",
+            price=55000.0,
+            price_formatted="55,000 ETB/month",
+            price_formatted_am="55,000 ብር/ወር",
+            purpose="rent",
+            property_type="house",
+            bhk=3,
+            bathrooms=2,
+            area=240,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+            amenities="Flower Garden, Shaded Veranda, Service Room, 2 Car Parking, Water Tank",
+            amenities_am="የአበባ አትክልት, ሰፊ በረንዳ, የሰራተኛ ክፍል, 2 መኪና ማቆሚያ, የውሃ ታንከር"
+        ),
+
+        # 19. Adama - Rent - Flat
+        Property(
+            title="1 BHK Compact Apartment near Adama University (ASTU)",
+            title_am="ባለ 1 መኝታ አፓርታማ በአዳማ ሳይንስና ቴክኖሎጂ ዩኒቨርሲቲ አጠገብ",
+            description="Perfect for university instructors or researchers. Clean 1-bedroom flat with study nook, fast internet access, and continuous municipal + tank water supply.",
+            description_am="ለዩኒቨርሲቲ መምህራን ወይም ተመራማሪዎች እጅግ ተስማሚ። የጥናት ጠረጴዛ ቦታ ያለው፣ ፈጣን ኢንተርኔት፣ እና አስተማማኝ የውሃ ታንከር የተገጠመለት ባለ 1 መኝታ አፓርታማ።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Dembela",
+            locality_am="ደምበላ",
+            price=22000.0,
+            price_formatted="22,000 ETB/month",
+            price_formatted_am="22,000 ብር/ወር",
+            purpose="rent",
+            property_type="flat",
+            bhk=1,
+            bathrooms=1,
+            area=55,
+            furnishing="Semi-Furnished",
+            furnishing_am="ከፊል እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1567496898669-ee935f5f647a?auto=format&fit=crop&w=800&q=80",
+            amenities="Near ASTU Campus, High Speed Internet, Water Tank, Tiled Floor",
+            amenities_am="ከአዳማ ዩኒቨርሲቲ አጠገብ, ፈጣን ኢንተርኔት, የውሃ ታንከር, የሴራሚክ ወለል"
+        ),
+
+        # 20. Adama - Rent - House
+        Property(
+            title="4 BHK Luxury G+1 House with Swimming Pool Access",
+            title_am="ባለ 4 መኝታ የቅንጦት ጂ+1 ቪላ በአዳማ",
+            description="Premium executive villa in Adama. Features 4 ensuite bedrooms, modern open-plan kitchen, generator, perimeter electric fence, security cameras, and swimming pool privilege.",
+            description_am="በአዳማ የሚገኝ ደረጃውን የጠበቀ የቅንጦት ጂ+1 ቪላ። 4 ራሳቸውን የቻሉ መታጠቢያ ያላቸው መኝታ ቤቶች፣ ክፍት ዘመናዊ ኩሽና፣ ጄኔሬተር፣ የኤሌክትሪክ አጥርና የደህንነት ካሜራዎች።",
+            city="Adama",
+            city_am="አዳማ",
+            locality="Bole Sub-City",
+            locality_am="ቦሌ ክፍለ ከተማ",
+            price=110000.0,
+            price_formatted="110,000 ETB/month",
+            price_formatted_am="110,000 ብር/ወር",
+            purpose="rent",
+            property_type="house",
+            bhk=4,
+            bathrooms=4,
+            area=400,
+            furnishing="Fully Furnished",
+            furnishing_am="ሙሉ እቃ ያለው",
+            image_url="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&q=80",
+            amenities="Ensuite Bedrooms, Generator, Electric Fence, CCTV, Swimming Pool Access",
+            amenities_am="የውስጥ መታጠቢያ ያላቸው ክፍሎች, ጄኔሬተር, የኤሌክትሪክ አጥር, CCTV, የዋና ገንዳ"
         )
     ]
     
-    # Fix Chembur price typo (9000 -> 90000)
-    for p in properties:
-        if p.locality == "Chembur" and p.price == 9000.0:
-            p.price = 90000.0
-            
     db.add_all(properties)
     db.commit()
     db.close()
-    print("Database successfully seeded with 20 properties!")
+    print("Database successfully seeded with 20 Ethiopian properties (Addis Ababa & Adama)!")
 
 if __name__ == "__main__":
     seed_database()
