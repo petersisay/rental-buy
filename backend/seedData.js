@@ -610,3 +610,94 @@ export const seedProjects = [
     contactEmail: "adama@flintstonehomes.com"
   }
 ];
+
+export const seedUsers = [
+  {
+    id: "usr-admin-1",
+    _id: "usr-admin-1",
+    name: "Kedami System Admin (የሲስተም አስተዳዳሪ)",
+    email: "admin@kedami.et",
+    role: "admin",
+    status: "approved",
+    phone: "+251 911 001122",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-01-01T08:00:00Z")
+  },
+  {
+    id: "usr-owner-1",
+    _id: "usr-owner-1",
+    name: "Dawit Haile (የቤት ባለቤት)",
+    email: "owner.demo@kedami.et",
+    role: "owner",
+    status: "approved",
+    phone: "+251 911 223344",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-02-15T09:30:00Z")
+  },
+  {
+    id: "usr-agent-1",
+    _id: "usr-agent-1",
+    name: "Almaz Bekele (ደላላ/ወኪል)",
+    email: "agent.demo@kedami.et",
+    role: "agent",
+    status: "approved",
+    company: "Addis Premier Realty (አዲስ ፕሪሚየር ሪልቲ)",
+    phone: "+251 911 445566",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-03-01T11:00:00Z")
+  },
+  {
+    id: "usr-developer-1",
+    _id: "usr-developer-1",
+    name: "Ayat Real Estate Rep (የአያት አልሚ ወኪል)",
+    email: "developer.demo@kedami.et",
+    role: "developer",
+    status: "approved",
+    company: "Ayat Real Estate Development",
+    phone: "+251 911 334455",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-01-10T10:00:00Z")
+  },
+  {
+    id: "usr-seeker-1",
+    _id: "usr-seeker-1",
+    name: "Hirut Tadesse (ተከራይ/ገዢ)",
+    email: "seeker.demo@kedami.et",
+    role: "seeker",
+    status: "approved",
+    phone: "+251 922 778899",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-03-20T14:15:00Z")
+  },
+  // Pending user signups awaiting admin approval
+  {
+    id: "usr-pending-1",
+    _id: "usr-pending-1",
+    name: "Yonas Melaku",
+    email: "yonas.melaku@gmail.com",
+    role: "agent",
+    status: "pending",
+    company: "Bole Luxury Brokerage",
+    phone: "+251 912 345678",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-11-06T16:20:00Z")
+  },
+  {
+    id: "usr-pending-2",
+    _id: "usr-pending-2",
+    name: "Sara Girma",
+    email: "sara.girma@gmail.com",
+    role: "owner",
+    status: "pending",
+    phone: "+251 913 987654",
+    city: "Adama",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-11-07T18:45:00Z")
+  }
+];
