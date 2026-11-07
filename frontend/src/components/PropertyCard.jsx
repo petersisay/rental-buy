@@ -1,23 +1,33 @@
 import React from 'react';
-import { Heart, MapPin, Bed, Bath, Maximize2, ShieldCheck } from 'lucide-react';
+import { Heart, MapPin, Bed, Bath, Maximize2 } from 'lucide-react';
 
-export default function PropertyCard({ property, isFavorite, onToggleFavorite, onSelect, onContact }) {
-  const amenitiesList = property.amenities ? property.amenities.split(',').map(s => s.trim()) : [];
+export default function PropertyCard({ property, isFavorite, onToggleFavorite, onSelect, onContact, lang, t }) {
+  const isAmharic = lang === 'am';
+  
+  const displayTitle = (isAmharic && property.title_am) ? property.title_am : property.title;
+  const displayPrice = (isAmharic && property.price_formatted_am) ? property.price_formatted_am : property.price_formatted;
+  const displayLocality = (isAmharic && property.locality_am) ? property.locality_am : property.locality;
+  const displayCity = (isAmharic && property.city_am) ? property.city_am : property.city;
+  
+  const amenitiesStr = (isAmharic && property.amenities_am) ? property.amenities_am : property.amenities;
+  const amenitiesList = amenitiesStr ? amenitiesStr.split(',').map(s => s.trim()) : [];
+
+  const perSqMValue = Math.round(property.price / (property.area || 1)).toLocaleString('en-US');
 
   return (
     <article className="property-card">
       <div className="card-image-wrap">
         <img 
           src={property.image_url || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"} 
-          alt={property.title} 
+          alt={displayTitle} 
           className="card-img"
           loading="lazy"
         />
         <span className={`badge-purpose ${property.purpose}`}>
-          For {property.purpose}
+          {property.purpose === 'buy' ? t.forBuyBadge : t.forRentBadge}
         </span>
         <span className="badge-type">
-          {property.property_type === 'flat' ? 'Flat' : 'House'}
+          {property.property_type === 'flat' ? t.flatBadge : t.houseBadge}
         </span>
         <button 
           className={`btn-favorite-card ${isFavorite ? 'active' : ''}`}
@@ -25,42 +35,42 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
             e.stopPropagation();
             onToggleFavorite(property);
           }}
-          title={isFavorite ? "Remove from shortlisted" : "Save property"}
+          title={isFavorite ? t.shortlisted : "Save"}
           aria-label="Toggle shortlist"
         >
-          <Heart size={18} fill={isFavorite ? "#d9222a" : "none"} color={isFavorite ? "#d9222a" : "currentColor"} />
+          <Heart size={18} fill={isFavorite ? "var(--accent-red)" : "none"} color={isFavorite ? "var(--accent-red)" : "currentColor"} />
         </button>
       </div>
 
       <div className="card-body">
         <div className="card-price-row">
-          <span className="card-price">{property.price_formatted}</span>
+          <span className="card-price">{displayPrice}</span>
           <span className="card-rate">
-            ₹{Math.round(property.price / property.area).toLocaleString('en-IN')} / sq ft
+            ~{perSqMValue} {t.perSqM}
           </span>
         </div>
 
-        <h3 className="card-title" title={property.title}>
-          {property.title}
+        <h3 className="card-title" title={displayTitle}>
+          {displayTitle}
         </h3>
 
         <div className="card-location">
-          <MapPin size={15} color="#d9222a" />
-          <span>{property.locality}, <strong>{property.city}</strong></span>
+          <MapPin size={15} color="var(--primary)" />
+          <span>{displayLocality}, <strong>{displayCity}</strong></span>
         </div>
 
         <div className="card-features">
           <div className="feature-item">
-            <span className="feature-label">Beds</span>
-            <span className="feature-val">{property.bhk} BHK</span>
+            <span className="feature-label">{t.labelBeds}</span>
+            <span className="feature-val">{property.bhk} {isAmharic ? 'መኝታ' : 'BHK'}</span>
           </div>
           <div className="feature-item">
-            <span className="feature-label">Baths</span>
-            <span className="feature-val">{property.bathrooms} Baths</span>
+            <span className="feature-label">{t.bathsLabel}</span>
+            <span className="feature-val">{property.bathrooms} {isAmharic ? 'መታጠቢያ' : 'Baths'}</span>
           </div>
           <div className="feature-item">
-            <span className="feature-label">Super Area</span>
-            <span className="feature-val">{property.area} sqft</span>
+            <span className="feature-label">{t.areaLabel}</span>
+            <span className="feature-val">{property.area} m²</span>
           </div>
         </div>
 
@@ -70,7 +80,7 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
               <span key={i} className="amenity-pill">{amenity}</span>
             ))}
             {amenitiesList.length > 3 && (
-              <span className="amenity-pill">+{amenitiesList.length - 3} more</span>
+              <span className="amenity-pill">+{amenitiesList.length - 3} {isAmharic ? 'ተጨማሪ' : 'more'}</span>
             )}
           </div>
         )}
@@ -81,14 +91,14 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
             onClick={() => onSelect(property)}
             type="button"
           >
-            View Details
+            {t.btnViewDetails}
           </button>
           <button 
             className="btn-card-contact" 
             onClick={() => onContact(property)}
             type="button"
           >
-            Contact Agent
+            {t.btnContactAgent}
           </button>
         </div>
       </div>
