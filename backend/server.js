@@ -5,7 +5,8 @@ import mongoose from 'mongoose';
 import { Property } from './models/Property.js';
 import { ContactSubmission } from './models/ContactSubmission.js';
 import { DeveloperProject } from './models/DeveloperProject.js';
-import { seedProperties, seedProjects } from './seedData.js';
+import { User } from './models/User.js';
+import { seedProperties, seedProjects, seedUsers } from './seedData.js';
 
 dotenv.config();
 
@@ -13,13 +14,16 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 app.use(cors());
-app.use(express.json());
+// Increase JSON payload limit to 15mb to comfortably support user base64 photo uploads
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // In-Memory Fallback store if MongoDB daemon is unreachable locally
 let isInMemoryFallback = false;
 let inMemoryProperties = [...seedProperties.map((p, idx) => ({ ...p, id: `prop-${idx + 1}`, _id: `prop-${idx + 1}`, createdAt: new Date() }))];
 let inMemoryContacts = [];
 let inMemoryProjects = [...seedProjects.map((p, idx) => ({ ...p, id: `proj-${idx + 1}`, _id: `proj-${idx + 1}`, createdAt: new Date() }))];
+let inMemoryUsers = [...seedUsers.map((u, idx) => ({ ...u, id: u.id || `usr-${idx + 1}`, _id: u._id || `usr-${idx + 1}`, createdAt: u.createdAt || new Date() }))];
 
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/kedami';
@@ -45,9 +49,16 @@ async function connectDB() {
       await DeveloperProject.insertMany(seedProjects);
       console.log('✅ Developer projects seeded.');
     }
+
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log('Seeding initial demo users and pending signups...');
+      await User.insertMany(seedUsers);
+      console.log('✅ Users seeded.');
+    }
   } catch (err) {
     console.warn(`⚠️ Local MongoDB connection failed (${err.message}).`);
-    console.log('ℹ️ Running in resilient In-Memory MERN mode with 20 seeded Ethiopian properties.');
+    console.log('ℹ️ Running in resilient In-Memory MERN mode with 20 seeded Ethiopian properties and demo users.');
     isInMemoryFallback = true;
   }
 }
@@ -62,6 +73,181 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ==========================================
+// AUTHENTICATION & USER MANAGEMENT ROUTES
+// ==========================================
+
+// POST /api/auth/login - Google & Email Sign-In / Registration
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, name, avatar, googleId, role, company, phone } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    if (!isInMemoryFallback) {
+      let user = await User.findOne({ email: normalizedEmail });
+
+      if (user) {
+        // Update avatar or name if Google account provided new values
+        if (avatar && !user.avatar) user.avatar = avatar;
+        if (googleId && !user.googleId) user.googleId = googleId;
+        await user.save();
+        return res.json({ user, isNew: false });
+      }
+
+      // Determine initial approval status:
+      // Pre-approved admin or demo domains get 'approved', new self-registered owners/agents get 'pending'
+      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et');
+      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'seeker');
+
+      user = new User({
+        name: name || normalizedEmail.split('@')[0],
+        email: normalizedEmail,
+        avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || normalizedEmail)}&background=10b981&color=fff`,
+        googleId: googleId || null,
+        role: assignedRole,
+        company: company || '',
+        phone: phone || '',
+        status: isAutoApproved ? 'approved' : 'pending' // Admin must approve new registrations
+      });
+
+      await user.save();
+      return res.status(201).json({ user, isNew: true });
+    } else {
+      // In-Memory fallback
+      let user = inMemoryUsers.find(u => u.email.toLowerCase() === normalizedEmail);
+
+      if (user) {
+        return res.json({ user, isNew: false });
+      }
+
+      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et');
+      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'seeker');
+      const newId = `usr-${Date.now()}`;
+
+      user = {
+        id: newId,
+        _id: newId,
+        name: name || normalizedEmail.split('@')[0],
+        email: normalizedEmail,
+        avatar: avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || normalizedEmail)}&background=10b981&color=fff`,
+        googleId: googleId || null,
+        role: assignedRole,
+        company: company || '',
+        phone: phone || '',
+        status: isAutoApproved ? 'approved' : 'pending',
+        createdAt: new Date()
+      };
+
+      inMemoryUsers.unshift(user);
+      return res.status(201).json({ user, isNew: true });
+    }
+  } catch (err) {
+    console.error('Error in login/auth:', err);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+});
+
+// POST /api/auth/demo-login - Instant 1-Click Demo Login for any role
+app.post('/api/auth/demo-login', async (req, res) => {
+  try {
+    const { role } = req.body;
+    const targetRole = (role || 'seeker').toLowerCase();
+
+    const roleEmailMap = {
+      admin: 'admin@kedami.et',
+      owner: 'owner.demo@kedami.et',
+      agent: 'agent.demo@kedami.et',
+      developer: 'developer.demo@kedami.et',
+      seeker: 'seeker.demo@kedami.et'
+    };
+
+    const targetEmail = roleEmailMap[targetRole] || 'seeker.demo@kedami.et';
+
+    if (!isInMemoryFallback) {
+      let user = await User.findOne({ email: targetEmail });
+      if (!user) {
+        const seedMatch = seedUsers.find(u => u.email === targetEmail);
+        if (seedMatch) {
+          user = new User(seedMatch);
+          await user.save();
+        }
+      }
+      return res.json({ user });
+    } else {
+      let user = inMemoryUsers.find(u => u.email === targetEmail);
+      if (!user) {
+        user = seedUsers.find(u => u.email === targetEmail);
+        if (user) inMemoryUsers.push(user);
+      }
+      return res.json({ user });
+    }
+  } catch (err) {
+    console.error('Error in demo login:', err);
+    res.status(500).json({ error: 'Demo login failed' });
+  }
+});
+
+// GET /api/auth/users - List users with status filtering (Admin User Approvals Queue)
+app.get('/api/auth/users', async (req, res) => {
+  try {
+    const { status, role } = req.query;
+
+    if (!isInMemoryFallback) {
+      const filter = {};
+      if (status && status !== 'all') filter.status = status;
+      if (role && role !== 'all') filter.role = role;
+
+      const users = await User.find(filter).sort({ createdAt: -1 });
+      return res.json(users);
+    } else {
+      let list = [...inMemoryUsers];
+      if (status && status !== 'all') list = list.filter(u => u.status === status);
+      if (role && role !== 'all') list = list.filter(u => u.role === role);
+      return res.json(list);
+    }
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ error: 'Failed to retrieve users' });
+  }
+});
+
+// PATCH /api/auth/users/:id/status - Approve or Reject User Sign-In (Admin Portal)
+app.patch('/api/auth/users/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!['approved', 'pending', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid user approval status' });
+    }
+
+    if (!isInMemoryFallback && mongoose.isValidObjectId(id)) {
+      const updated = await User.findByIdAndUpdate(id, { status }, { new: true });
+      if (!updated) return res.status(404).json({ error: 'User not found' });
+      return res.json(updated);
+    }
+
+    const idx = inMemoryUsers.findIndex(u => u.id === id || u._id === id);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    inMemoryUsers[idx].status = status;
+    return res.json(inMemoryUsers[idx]);
+  } catch (err) {
+    console.error('Error updating user status:', err);
+    res.status(500).json({ error: 'Failed to update user status' });
+  }
+});
+
+// ==========================================
+// PROPERTY ROUTES
+// ==========================================
 
 // GET /api/properties - Search and Filter
 app.get('/api/properties', async (req, res) => {
@@ -178,11 +364,11 @@ app.get('/api/properties', async (req, res) => {
       if (search) {
         const sLower = search.toLowerCase();
         list = list.filter(p => 
-          (p.title && p.title.toLowerCase().includes(sLower)) ||
-          (p.title_am && p.title_am.includes(search)) ||
-          (p.locality && p.locality.toLowerCase().includes(sLower)) ||
-          (p.locality_am && p.locality_am.includes(search)) ||
-          (p.description && p.description.toLowerCase().includes(sLower)) ||
+          (p.title && p.title.toLowerCase().includes(sLower)) || 
+          (p.title_am && p.title_am.includes(search)) || 
+          (p.locality && p.locality.toLowerCase().includes(sLower)) || 
+          (p.locality_am && p.locality_am.includes(search)) || 
+          (p.description && p.description.toLowerCase().includes(sLower)) || 
           (p.amenities && p.amenities.toLowerCase().includes(sLower))
         );
       }
@@ -213,7 +399,7 @@ app.get('/api/properties/:id', async (req, res) => {
   }
 });
 
-// POST /api/properties - Add new property (Used by Owners, Agents, Developers, Admin)
+// POST /api/properties - Add new property with image uploads (Admin approvals queue)
 app.post('/api/properties', async (req, res) => {
   try {
     const body = req.body;
@@ -227,14 +413,26 @@ app.post('/api/properties', async (req, res) => {
     const formattedETB = `${priceNum.toLocaleString('en-US')} ${body.purpose === 'rent' ? 'ETB/month' : 'ETB'}`;
     const formattedETBAm = `${priceNum.toLocaleString('en-US')} ${body.purpose === 'rent' ? 'ብር/ወር' : 'ብር'}`;
 
+    // Handle multiple images gallery array
+    let galleryImages = [];
+    if (Array.isArray(body.images) && body.images.length > 0) {
+      galleryImages = body.images.filter(img => typeof img === 'string' && img.trim().length > 0);
+    } else if (body.image_url) {
+      galleryImages = [body.image_url];
+    } else {
+      galleryImages = ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80'];
+    }
+
     const propertyData = {
       ...body,
       price: priceNum,
       price_formatted: body.price_formatted || formattedETB,
       price_formatted_am: body.price_formatted_am || formattedETBAm,
       city_am: body.city === 'Addis Ababa' ? 'አዲስ አበባ' : 'አዳማ',
+      image_url: galleryImages[0],
+      images: galleryImages,
       role: body.role || 'owner',
-      status: body.role === 'admin' ? 'approved' : 'pending', // Admins auto-approve, others enter pending review
+      status: body.role === 'admin' ? 'approved' : 'pending', // Admins auto-approve; owners, agents, developers enter pending review
       createdAt: new Date()
     };
 
@@ -254,7 +452,7 @@ app.post('/api/properties', async (req, res) => {
   }
 });
 
-// PATCH /api/properties/:id/status - Approve or Reject (Admin Portal)
+// PATCH /api/properties/:id/status - Approve or Reject Property (Admin Portal)
 app.patch('/api/properties/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
@@ -296,7 +494,7 @@ app.delete('/api/properties/:id', async (req, res) => {
   }
 });
 
-// POST /api/properties/:id/contact - Submit Inquiry
+// POST /api/properties/:id/contact - Submit Inquiry Lead
 app.post('/api/properties/:id/contact', async (req, res) => {
   try {
     const { id } = req.params;
@@ -404,6 +602,10 @@ app.get('/api/stats', async (req, res) => {
       const inquiries = await ContactSubmission.countDocuments();
       const developerProjects = await DeveloperProject.countDocuments();
 
+      const totalUsers = await User.countDocuments();
+      const pendingUsers = await User.countDocuments({ status: 'pending' });
+      const approvedUsers = await User.countDocuments({ status: 'approved' });
+
       return res.json({
         total,
         approved,
@@ -412,7 +614,10 @@ app.get('/api/stats', async (req, res) => {
         addisCount,
         adamaCount,
         inquiries,
-        developerProjects
+        developerProjects,
+        totalUsers,
+        pendingUsers,
+        approvedUsers
       });
     }
 
@@ -423,6 +628,10 @@ app.get('/api/stats', async (req, res) => {
     const addisCount = inMemoryProperties.filter(p => p.city === 'Addis Ababa').length;
     const adamaCount = inMemoryProperties.filter(p => p.city === 'Adama').length;
 
+    const totalUsers = inMemoryUsers.length;
+    const pendingUsers = inMemoryUsers.filter(u => u.status === 'pending').length;
+    const approvedUsers = inMemoryUsers.filter(u => u.status === 'approved').length;
+
     return res.json({
       total,
       approved,
@@ -431,7 +640,10 @@ app.get('/api/stats', async (req, res) => {
       addisCount,
       adamaCount,
       inquiries: inMemoryContacts.length,
-      developerProjects: inMemoryProjects.length
+      developerProjects: inMemoryProjects.length,
+      totalUsers,
+      pendingUsers,
+      approvedUsers
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to retrieve platform stats' });
