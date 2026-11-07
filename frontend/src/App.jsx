@@ -4,11 +4,35 @@ import HeroSearch from './components/HeroSearch';
 import PropertyCard from './components/PropertyCard';
 import PropertyModal from './components/PropertyModal';
 import FavoritesDrawer from './components/FavoritesDrawer';
-import { Home, Filter, RefreshCw, AlertCircle, Building, CheckCircle } from 'lucide-react';
+import { translations } from './locales/translations';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const API_BASE = 'http://127.0.0.1:8000';
 
 export default function App() {
+  // Language State: Amharic ('am') or English ('en')
+  const [lang, setLang] = useState(() => {
+    try {
+      return localStorage.getItem('kedami_lang') || 'am';
+    } catch {
+      return 'am';
+    }
+  });
+
+  const t = translations[lang] || translations.am;
+
+  const toggleLanguage = () => {
+    setLang((prev) => {
+      const next = prev === 'am' ? 'en' : 'am';
+      try {
+        localStorage.setItem('kedami_lang', next);
+      } catch (e) {
+        console.error(e);
+      }
+      return next;
+    });
+  };
+
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,7 +54,7 @@ export default function App() {
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [favorites, setFavorites] = useState(() => {
     try {
-      const saved = localStorage.getItem('mb_shortlisted');
+      const saved = localStorage.getItem('kedami_shortlisted');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -40,7 +64,7 @@ export default function App() {
   // Save favorites to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('mb_shortlisted', JSON.stringify(favorites));
+      localStorage.setItem('kedami_shortlisted', JSON.stringify(favorites));
     } catch (e) {
       console.error('Failed to save favorites to localStorage', e);
     }
@@ -110,6 +134,13 @@ export default function App() {
     });
   };
 
+  const getCityDisplayName = (cityName) => {
+    if (!cityName) return t.allCities;
+    if (cityName === 'Addis Ababa') return t.addisAbaba;
+    if (cityName === 'Adama') return t.adama;
+    return cityName;
+  };
+
   return (
     <div className="app">
       <Navbar
@@ -117,6 +148,9 @@ export default function App() {
         onCityChange={(city) => updateFilters({ city })}
         favoritesCount={favorites.length}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
+        lang={lang}
+        onToggleLang={toggleLanguage}
+        t={t}
       />
 
       <HeroSearch
@@ -124,6 +158,8 @@ export default function App() {
         onFilterChange={updateFilters}
         onSearch={fetchProperties}
         onReset={resetFilters}
+        lang={lang}
+        t={t}
       />
 
       <main className="main-container">
@@ -131,36 +167,35 @@ export default function App() {
         <div className="results-header">
           <div>
             <h2 className="results-count">
-              <span>{properties.length}</span> Properties Available to {filters.purpose === 'rent' ? 'Rent' : 'Buy'}
-              {filters.city ? ` in ${filters.city}` : ' in Bangalore & Mumbai'}
+              <span>{properties.length}</span> {filters.purpose === 'rent' ? t.resultsCountSuffixRent : t.resultsCountSuffixBuy} ({getCityDisplayName(filters.city)})
             </h2>
             <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.2rem' }}>
-              Showing verified residential apartments & villas with exact pricing
+              {t.resultsSubtitle}
             </p>
           </div>
 
           <div className="filter-tags">
             {filters.city && (
               <span className="filter-tag">
-                City: {filters.city}
+                {t.labelCity}: {getCityDisplayName(filters.city)}
                 <button onClick={() => updateFilters({ city: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
               </span>
             )}
             {filters.property_type && (
               <span className="filter-tag">
-                Type: {filters.property_type === 'flat' ? 'Flat' : 'House'}
+                {t.labelType}: {filters.property_type === 'flat' ? t.typeFlat : t.typeHouse}
                 <button onClick={() => updateFilters({ property_type: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
               </span>
             )}
             {filters.bhk && (
               <span className="filter-tag">
-                {filters.bhk} BHK
+                {filters.bhk} {t.bedsCount}
                 <button onClick={() => updateFilters({ bhk: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
               </span>
             )}
             {(filters.min_price || filters.max_price) && (
               <span className="filter-tag">
-                Budget Filter Active
+                {t.labelBudget}
                 <button onClick={() => updateFilters({ min_price: null, max_price: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
               </span>
             )}
@@ -173,7 +208,7 @@ export default function App() {
 
             {(filters.city || filters.property_type || filters.bhk || filters.min_price || filters.max_price || filters.search) && (
               <button className="btn-clear-filters" onClick={resetFilters}>
-                Clear All Filters
+                {t.clearAllFilters}
               </button>
             )}
           </div>
@@ -182,9 +217,9 @@ export default function App() {
         {/* Loading State */}
         {loading && (
           <div style={{ textAlign: 'center', padding: '5rem 0' }}>
-            <RefreshCw size={36} color="#d9222a" style={{ animation: 'spin 1s linear infinite' }} />
+            <RefreshCw size={36} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
             <p style={{ marginTop: '1rem', color: '#64748b', fontWeight: 600 }}>
-              Searching verified properties in {filters.city || 'Bangalore & Mumbai'}...
+              {t.searching}
             </p>
           </div>
         )}
@@ -197,7 +232,7 @@ export default function App() {
             <p style={{ color: '#7f1d1d', marginTop: '0.4rem', fontSize: '0.9rem' }}>{error}</p>
             <button
               onClick={fetchProperties}
-              style={{ marginTop: '1rem', background: '#dc2626', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
+              style={{ marginTop: '1rem', background: 'var(--primary)', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
             >
               Retry Search
             </button>
@@ -221,6 +256,8 @@ export default function App() {
                   setSelectedProperty(p);
                   setInitialContactMode(true);
                 }}
+                lang={lang}
+                t={t}
               />
             ))}
           </div>
@@ -231,13 +268,13 @@ export default function App() {
           <div className="empty-state">
             <div className="empty-state-icon">🏠</div>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>
-              No Properties Found Matching Your Criteria
+              {t.noPropertiesFound}
             </h3>
             <p style={{ color: '#64748b', maxWidth: '480px', margin: '0.5rem auto 1.5rem', fontSize: '0.95rem' }}>
-              We couldn't find any properties matching your current budget or filters in {filters.city || 'Bangalore / Mumbai'}. Try expanding your budget range or clearing some filters.
+              {t.noPropertiesDesc}
             </p>
-            <button className="btn-search-main" style={{ maxWidth: '220px', margin: '0 auto' }} onClick={resetFilters}>
-              Reset All Filters
+            <button className="btn-search-main" style={{ maxWidth: '240px', margin: '0 auto' }} onClick={resetFilters}>
+              {t.btnResetFilters}
             </button>
           </div>
         )}
@@ -249,6 +286,8 @@ export default function App() {
           property={selectedProperty}
           onClose={() => setSelectedProperty(null)}
           initialContactMode={initialContactMode}
+          lang={lang}
+          t={t}
         />
       )}
 
@@ -259,6 +298,8 @@ export default function App() {
         favorites={favorites}
         onRemoveFavorite={removeFavorite}
         onSelectProperty={(p) => setSelectedProperty(p)}
+        lang={lang}
+        t={t}
       />
 
       {/* Footer */}
@@ -266,43 +307,43 @@ export default function App() {
         <div className="footer-content">
           <div className="footer-brand">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <div className="logo-badge">mb</div>
-              <h3 style={{ margin: 0 }}>magicbricks</h3>
+              <div className="logo-badge">ቀዳሚ</div>
+              <h3 style={{ margin: 0 }}>{lang === 'am' ? 'ቀዳሚ' : 'kedami'}</h3>
             </div>
             <p style={{ fontSize: '0.88rem', lineHeight: '1.6' }}>
-              India's premier real estate platform connecting buyers, tenants, and property owners across Bangalore and Mumbai with verified listings and transparent pricing.
+              {t.footerAbout}
             </p>
           </div>
 
           <div>
             <h4 style={{ color: 'white', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: 700 }}>
-              Bangalore Properties
+              {t.footerAddisTitle}
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.85rem' }}>
-              <li>Flats for Sale in Whitefield</li>
-              <li>Apartments in Indiranagar</li>
-              <li>Flats for Rent in HSR Layout</li>
-              <li>Independent Houses in Koramangala</li>
-              <li>Penthouses in Hebbal</li>
+              <li>{lang === 'am' ? 'በቦሌ የሚሸጡ አፓርታማዎች' : 'Flats for Sale in Bole'}</li>
+              <li>{lang === 'am' ? 'በካዛንቺስ የሚከራዩ ቤቶች' : 'Apartments for Rent in Kazanchis'}</li>
+              <li>{lang === 'am' ? 'በሲኤምሲ የሚሸጡ ቪላዎች' : 'Villas in CMC Tsehay'}</li>
+              <li>{lang === 'am' ? 'በኦልድ ኤርፖርት የቅንጦት ቤቶች' : 'Luxury Homes in Old Airport'}</li>
+              <li>{lang === 'am' ? 'በሳርቤት የተሟሉ አፓርታማዎች' : 'Furnished Flats in Sarbet'}</li>
             </ul>
           </div>
 
           <div>
             <h4 style={{ color: 'white', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: 700 }}>
-              Mumbai Properties
+              {t.footerAdamaTitle}
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.85rem' }}>
-              <li>Sea-Facing Flats in Bandra West</li>
-              <li>Luxury Condos in Worli</li>
-              <li>Bungalows for Sale in Juhu</li>
-              <li>Flats for Rent in Powai</li>
-              <li>Apartments in Andheri West</li>
+              <li>{lang === 'am' ? 'በቦሌ ክ/ከተማ አዳማ የሚሸጡ ቪላዎች' : 'Villas for Sale in Bole, Adama'}</li>
+              <li>{lang === 'am' ? 'በደምበላ የሚከራዩ አፓርታማዎች' : 'Flats for Rent in Dembela'}</li>
+              <li>{lang === 'am' ? 'በፖስታ ቤት ሰፈር ቤቶች' : 'Homes near Posta Bet'}</li>
+              <li>{lang === 'am' ? 'በወንጂ መንገድ ራሳቸውን የቻሉ ቤቶች' : 'Standalone Houses on Wonji Road'}</li>
+              <li>{lang === 'am' ? 'በቦኩ ሰፈር ተመጣጣኝ ቤቶች' : 'Affordable Flats in Boku'}</li>
             </ul>
           </div>
         </div>
 
         <div className="footer-bottom">
-          © 2026 MagicBricks Clone Demo • Built with FastAPI, SQLite & React.
+          {t.footerCopyright}
         </div>
       </footer>
     </div>
