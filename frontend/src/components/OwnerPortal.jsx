@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { Home, PlusCircle, CheckCircle2, Trash2, MapPin, Tag } from 'lucide-react';
+import { Home, PlusCircle, CheckCircle2, Trash2, MapPin, Tag, Clock, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import ImageUploader from './ImageUploader';
 
-export default function OwnerPortal({ properties, onAddProperty, onDeleteProperty, lang, t, apiBase }) {
+export default function OwnerPortal({ 
+  properties, 
+  onAddProperty, 
+  onDeleteProperty, 
+  lang, 
+  t, 
+  currentUser 
+}) {
   const isAmharic = lang === 'am';
 
   const [formData, setFormData] = useState({
@@ -21,9 +29,13 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
     image_url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
     amenities: 'Backup Generator, Water Tank, 24/7 Security',
     amenities_am: 'ተጠባባቂ ጄኔሬተር, የውሃ ታንከር, 24/7 ጥበቃ',
-    ownerName: '',
-    ownerPhone: ''
+    ownerName: currentUser?.name || '',
+    ownerPhone: currentUser?.phone || ''
   });
+
+  const [images, setImages] = useState([
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'
+  ]);
 
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -38,6 +50,8 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
     setSuccessMsg('');
 
     try {
+      const selectedImages = images.length > 0 ? images : [formData.image_url];
+
       const payload = {
         title: formData.title,
         title_am: formData.title_am || formData.title,
@@ -53,13 +67,15 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
         area: Number(formData.area),
         furnishing: formData.furnishing,
         furnishing_am: formData.furnishing_am,
-        image_url: formData.image_url,
+        image_url: selectedImages[0],
+        images: selectedImages,
         amenities: formData.amenities,
         amenities_am: formData.amenities_am,
         role: 'owner',
         postedBy: {
-          name: formData.ownerName || 'Direct Owner',
-          phone: formData.ownerPhone || '+251 911 000000'
+          name: formData.ownerName || currentUser?.name || 'Direct Owner',
+          phone: formData.ownerPhone || currentUser?.phone || '+251 911 000000',
+          email: currentUser?.email || ''
         }
       };
 
@@ -67,8 +83,8 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
 
       setSuccessMsg(
         isAmharic
-          ? 'ንብረትዎ በተሳካ ሁኔታ ተመዝግቧል! በአስተዳዳሪው ተገምግሞ በቅርቡ በቀጥታ ይለጠፋል።'
-          : 'Your property has been submitted successfully and submitted for admin review!'
+          ? 'ንብረትዎ በተሳካ ሁኔታ ተመዝግቧል! በአስተዳዳሪው ተገምግሞ ሲጸድቅ በቀጥታ ይለጠፋል።'
+          : 'Your property and photos have been submitted successfully for Administrator verification!'
       );
 
       // Reset form fields
@@ -80,9 +96,10 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
         locality_am: '',
         price: '',
         area: '',
-        ownerName: '',
-        ownerPhone: ''
+        ownerName: currentUser?.name || '',
+        ownerPhone: currentUser?.phone || ''
       }));
+      setImages(['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80']);
     } catch (err) {
       setErrorMsg(err.message || 'Failed to submit property.');
     } finally {
@@ -91,64 +108,85 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
   };
 
   return (
-    <div className="portal-container">
-      <div className="portal-header">
-        <div className="portal-icon-wrapper" style={{ background: '#ecfdf5', color: 'var(--primary)' }}>
-          <Home size={28} />
+    <div className="portal-container max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="portal-header flex items-center gap-4 mb-6">
+        <div className="portal-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-100">
+          <Home size={30} />
         </div>
         <div>
-          <h1 className="portal-title">{t.ownersTitle}</h1>
-          <p className="portal-subtitle">{t.ownersSubtitle}</p>
+          <h1 className="portal-title text-2xl sm:text-3xl font-extrabold text-gray-900">{t.ownersTitle}</h1>
+          <p className="portal-subtitle text-sm text-gray-600">{t.ownersSubtitle}</p>
         </div>
       </div>
 
-      <div className="portal-grid">
+      {/* Account Verification Notice if User is Pending */}
+      {currentUser?.status === 'pending' && (
+        <div className="mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+          <Clock className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="text-xs sm:text-sm">
+            <strong>{t.authPendingNoticeTitle}:</strong> {t.ownersPendingWarning}
+          </div>
+        </div>
+      )}
+
+      <div className="portal-grid grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Post Form */}
-        <div className="portal-card">
-          <div className="portal-card-header">
-            <PlusCircle size={20} color="var(--primary)" />
-            <h2>{t.ownersFormHeading}</h2>
+        <div className="lg:col-span-7 portal-card bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-7">
+          <div className="portal-card-header flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
+            <PlusCircle size={22} className="text-emerald-600" />
+            <h2 className="text-lg font-bold text-gray-900">{t.ownersFormHeading}</h2>
           </div>
 
           {successMsg && (
-            <div className="alert-success">
-              <CheckCircle2 size={20} />
+            <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3">
+              <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          {errorMsg && <div className="alert-error">{errorMsg}</div>}
+          {errorMsg && (
+            <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-3">
+              <AlertTriangle size={18} className="text-rose-600 flex-shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} className="portal-form">
-            <div className="form-row">
-              <div className="form-group">
-                <label className="field-label">{isAmharic ? 'የንብረቱ ርዕስ (English)' : 'Property Title (English)'} *</label>
-                <input
-                  type="text"
-                  required
-                  className="field-input"
-                  placeholder="e.g. 3 BHK Luxury Apartment in Bole"
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="field-label">{isAmharic ? 'የንብረቱ ርዕስ (አማርኛ)' : 'Property Title (Amharic)'}</label>
-                <input
-                  type="text"
-                  className="field-input"
-                  placeholder="ለምሳሌ ባለ 3 መኝታ ቅንጦት አፓርታማ በቦሌ"
-                  value={formData.title_am}
-                  onChange={e => setFormData({ ...formData, title_am: e.target.value })}
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="form-group">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                {isAmharic ? 'የቤቱ መጠሪያ በእንግሊዝኛ (Title in English)' : 'Property Title (English)'} *
+              </label>
+              <input
+                type="text"
+                required
+                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
+                placeholder="e.g. Spacious 3 BHK Luxury Flat in Bole Medhanialem"
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
+              />
             </div>
 
-            <div className="form-row">
+            <div className="form-group">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                {isAmharic ? 'የቤቱ መጠሪያ በአማርኛ (Title in Amharic)' : 'Property Title (Amharic)'}
+              </label>
+              <input
+                type="text"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
+                placeholder="ለምሳሌ በቦሌ መድኃኔዓለም የሚገኝ ባለ 3 መኝታ ቅንጦት አፓርታማ"
+                value={formData.title_am}
+                onChange={e => setFormData({ ...formData, title_am: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="field-label">{t.labelCity} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {t.labelCity} *
+                </label>
                 <select
-                  className="field-select"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500"
                   value={formData.city}
                   onChange={e => setFormData({ ...formData, city: e.target.value })}
                 >
@@ -158,23 +196,27 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
 
               <div className="form-group">
-                <label className="field-label">{isAmharic ? 'ሰፈር (Locality)' : 'Locality / Sub-city'} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {t.labelLocality} *
+                </label>
                 <input
                   type="text"
                   required
-                  className="field-input"
-                  placeholder="e.g. Bole, CMC, Kazanchis, Dembela"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g. Bole, CMC, Sarbet, Wonji..."
                   value={formData.locality}
-                  onChange={e => setFormData({ ...formData, locality: e.target.value, locality_am: e.target.value })}
+                  onChange={e => setFormData({ ...formData, locality: e.target.value })}
                 />
               </div>
             </div>
 
-            <div className="form-row">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="field-label">{isAmharic ? 'አላማ (Purpose)' : 'Purpose'} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {isAmharic ? 'የማስመዝገቢያ አይነት (Purpose)' : 'Listing Purpose'} *
+                </label>
                 <select
-                  className="field-select"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500"
                   value={formData.purpose}
                   onChange={e => setFormData({ ...formData, purpose: e.target.value })}
                 >
@@ -184,9 +226,11 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
 
               <div className="form-group">
-                <label className="field-label">{t.labelType} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {t.labelType} (Flat / House) *
+                </label>
                 <select
-                  className="field-select"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500"
                   value={formData.property_type}
                   onChange={e => setFormData({ ...formData, property_type: e.target.value })}
                 >
@@ -196,14 +240,16 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
             </div>
 
-            <div className="form-row">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="field-label">{isAmharic ? 'ዋጋ በብር (Price in ETB)' : 'Price (in ETB)'} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {isAmharic ? 'ዋጋ በብር (Price in ETB)' : 'Price (in ETB)'} *
+                </label>
                 <input
                   type="number"
                   required
                   min="1000"
-                  className="field-input"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
                   placeholder="e.g. 45000 (Rent) or 15000000 (Buy)"
                   value={formData.price}
                   onChange={e => setFormData({ ...formData, price: e.target.value })}
@@ -211,12 +257,14 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
 
               <div className="form-group">
-                <label className="field-label">{t.areaLabel} (m²) *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {t.areaLabel} (m²) *
+                </label>
                 <input
                   type="number"
                   required
                   min="20"
-                  className="field-input"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
                   placeholder="e.g. 140"
                   value={formData.area}
                   onChange={e => setFormData({ ...formData, area: e.target.value })}
@@ -224,11 +272,13 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
             </div>
 
-            <div className="form-row">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-group">
-                <label className="field-label">{t.labelBeds} (BHK) *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {t.labelBeds} (BHK) *
+                </label>
                 <select
-                  className="field-select"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500"
                   value={formData.bhk}
                   onChange={e => setFormData({ ...formData, bhk: Number(e.target.value) })}
                 >
@@ -240,9 +290,11 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
 
               <div className="form-group">
-                <label className="field-label">{t.bathsLabel} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {t.bathsLabel} *
+                </label>
                 <select
-                  className="field-select"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500"
                   value={formData.bathrooms}
                   onChange={e => setFormData({ ...formData, bathrooms: Number(e.target.value) })}
                 >
@@ -254,44 +306,25 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="field-label">{isAmharic ? 'የእቃ ሁኔታ (Furnishing)' : 'Furnishing'} *</label>
-                <select
-                  className="field-select"
-                  value={formData.furnishing}
-                  onChange={e => {
-                    const f = e.target.value;
-                    let fAm = 'ያልተሟላ እቃ';
-                    if (f === 'Fully Furnished') fAm = 'ሙሉ እቃ ያለው';
-                    if (f === 'Semi-Furnished') fAm = 'ከፊል እቃ ያለው';
-                    setFormData({ ...formData, furnishing: f, furnishing_am: fAm });
-                  }}
-                >
-                  <option value="Fully Furnished">{isAmharic ? 'ሙሉ እቃ ያለው (Fully Furnished)' : 'Fully Furnished'}</option>
-                  <option value="Semi-Furnished">{isAmharic ? 'ከፊል እቃ ያለው (Semi-Furnished)' : 'Semi-Furnished'}</option>
-                  <option value="Unfurnished">{isAmharic ? 'ያልተሟላ እቃ (Unfurnished)' : 'Unfurnished'}</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="field-label">{isAmharic ? 'የምስል ሊንክ (Photo URL)' : 'Photo URL'}</label>
-                <input
-                  type="url"
-                  className="field-input"
-                  value={formData.image_url}
-                  onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                />
-              </div>
+            {/* Image Uploader Component */}
+            <div className="pt-2">
+              <ImageUploader
+                images={images}
+                onChange={setImages}
+                t={t}
+                lang={lang}
+              />
             </div>
 
-            <div className="form-row">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div className="form-group">
-                <label className="field-label">{isAmharic ? 'የባለቤቱ ስም' : 'Owner Full Name'} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {isAmharic ? 'የባለቤቱ ስም' : 'Owner Full Name'} *
+                </label>
                 <input
                   type="text"
                   required
-                  className="field-input"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
                   placeholder="e.g. Almaz Kebede"
                   value={formData.ownerName}
                   onChange={e => setFormData({ ...formData, ownerName: e.target.value })}
@@ -299,11 +332,13 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
 
               <div className="form-group">
-                <label className="field-label">{isAmharic ? 'የባለቤቱ ስልክ ቁጥር' : 'Owner Mobile Number'} *</label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  {isAmharic ? 'የባለቤቱ ስልክ ቁጥር' : 'Owner Mobile Number'} *
+                </label>
                 <input
                   type="tel"
                   required
-                  className="field-input"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
                   placeholder="e.g. +251 911 234567"
                   value={formData.ownerPhone}
                   onChange={e => setFormData({ ...formData, ownerPhone: e.target.value })}
@@ -311,53 +346,67 @@ export default function OwnerPortal({ properties, onAddProperty, onDeletePropert
               </div>
             </div>
 
-            <button type="submit" className="btn-search-main" disabled={submitting}>
-              {submitting ? (isAmharic ? 'በመመዝገብ ላይ...' : 'Submitting...') : (isAmharic ? 'ንብረቱን በነፃ ይለጥፉ' : 'Post Property Free')}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              <PlusCircle className="w-5 h-5" />
+              <span>{submitting ? (isAmharic ? 'በመመዝገብ ላይ...' : 'Submitting...') : (isAmharic ? 'ንብረቱን በነፃ ይለጥፉ' : 'Post Property Free')}</span>
             </button>
           </form>
         </div>
 
         {/* Listings List */}
-        <div className="portal-card">
-          <div className="portal-card-header">
-            <Tag size={20} color="var(--primary)" />
-            <h2>{t.ownersListHeading} ({ownerProperties.length})</h2>
-          </div>
+        <div className="lg:col-span-5 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center justify-between">
+              <span>{t.ownersListHeading}</span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+                {ownerProperties.length} {t.resultsCountSuffixBuy.split(' ')[0]}
+              </span>
+            </h2>
 
-          <div className="portal-items-list">
             {ownerProperties.length === 0 ? (
-              <p style={{ color: '#64748b', textAlign: 'center', padding: '2rem 0' }}>
-                {isAmharic ? 'እስካሁን የተለጠፈ ንብረት የለም።' : 'No properties posted yet.'}
+              <p className="text-sm text-gray-500 italic py-6 text-center">
+                {isAmharic ? 'እስካሁን ያስመዘገቡት ንብረት የለም።' : 'No properties posted yet.'}
               </p>
             ) : (
-              ownerProperties.map(prop => (
-                <div key={prop.id || prop._id} className="portal-item">
-                  <img src={prop.image_url} alt={prop.title} className="portal-item-img" />
-                  <div className="portal-item-content">
-                    <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.25rem' }}>
-                      <span className={`status-badge status-${prop.status}`}>
-                        {prop.status === 'approved' ? (isAmharic ? 'የፀደቀ' : 'Approved') : (isAmharic ? 'በግምገማ ላይ' : 'Pending Review')}
-                      </span>
-                      <span className="badge-purpose buy" style={{ position: 'static', padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}>
-                        {prop.purpose === 'buy' ? t.forBuyBadge : t.forRentBadge}
-                      </span>
+              <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+                {ownerProperties.map(prop => (
+                  <div key={prop.id || prop._id} className="p-3.5 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:border-emerald-200 transition-all flex gap-3 group">
+                    <img
+                      src={prop.image_url || (prop.images && prop.images[0])}
+                      alt={prop.title}
+                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-gray-200"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                          prop.status === 'approved' 
+                            ? 'bg-emerald-100 text-emerald-800' 
+                            : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {prop.status === 'approved' ? (isAmharic ? 'የፀደቀ' : 'Live') : (isAmharic ? 'በግምገማ ላይ' : 'Pending')}
+                        </span>
+                        <span className="text-[10px] font-semibold text-gray-500 uppercase">
+                          {prop.property_type === 'flat' ? t.flatBadge : t.houseBadge}
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-gray-900 truncate">
+                        {isAmharic ? (prop.title_am || prop.title) : prop.title}
+                      </h4>
+                      <p className="text-xs text-gray-500 truncate flex items-center gap-1 mt-0.5">
+                        <MapPin size={12} />
+                        <span>{prop.locality}, {prop.city}</span>
+                      </p>
+                      <p className="text-xs font-bold text-emerald-600 mt-1">
+                        {isAmharic ? (prop.price_formatted_am || `${prop.price?.toLocaleString()} ብር`) : (prop.price_formatted || `${prop.price?.toLocaleString()} ETB`)}
+                      </p>
                     </div>
-                    <h4>{isAmharic && prop.title_am ? prop.title_am : prop.title}</h4>
-                    <p className="price-tag">{isAmharic && prop.price_formatted_am ? prop.price_formatted_am : prop.price_formatted}</p>
-                    <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                      <MapPin size={12} style={{ display: 'inline', marginRight: '2px' }} />
-                      {prop.locality}, {prop.city} • {prop.bhk} {isAmharic ? 'መኝታ' : 'BHK'}
-                    </p>
                   </div>
-                  <button
-                    onClick={() => onDeleteProperty(prop.id || prop._id)}
-                    className="btn-delete-item"
-                    title="Delete property"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>
