@@ -2,6 +2,12 @@ export const translations = {
   en: {
     brandName: "kedami",
     brandTagline: "ETHIOPIA'S NO. 1 PROPERTY PORTAL",
+    navHome: "Search Properties",
+    navOwners: "Property Owners",
+    navAgents: "Agents & Brokers",
+    navDevelopers: "Builders & Developers",
+    navAdmin: "Platform Admin",
+    navPostProperty: "Post Property Free",
     selectCity: "City:",
     allCities: "All Cities (Addis Ababa & Adama)",
     addisAbaba: "Addis Ababa",
@@ -65,11 +71,42 @@ export const translations = {
     footerAbout: "Kedami (ቀዳሚ) is Ethiopia's premier real estate technology platform connecting home buyers, tenants, and property developers with verified listings across Addis Ababa and Adama.",
     footerAddisTitle: "Addis Ababa Properties",
     footerAdamaTitle: "Adama Properties",
-    footerCopyright: "© 2026 Kedami (ቀዳሚ) Real Estate Portal • Built with FastAPI, SQLite & React."
+    footerCopyright: "© 2026 Kedami (ቀዳሚ) Real Estate Portal • Built with MERN Stack (MongoDB, Express, React, Node.js).",
+    
+    // Owners Portal
+    ownersTitle: "Property Owners Portal (የቤት ባለቤቶች)",
+    ownersSubtitle: "Directly rent out your flat or sell your house in Addis Ababa & Adama with 0% brokerage fee.",
+    ownersFormHeading: "Post Your Property as an Owner",
+    ownersListHeading: "Your Active Listings",
+    
+    // Agents Portal
+    agentsTitle: "Real Estate Agents & Brokers Portal (ደላላዎች / ወኪሎች)",
+    agentsSubtitle: "List properties on behalf of landlords and manage prospective client enquiries.",
+    agentsFormHeading: "Add Client Property Listing",
+    agentsLeadsHeading: "Client Enquiry Leads",
+    
+    // Developers Portal
+    developersTitle: "Builders & Real Estate Developers (የሪል እስቴት አልሚዎች)",
+    developersSubtitle: "Promote new multi-unit developments and real estate projects across Ethiopia (e.g., Ayat, Tsehay, Noah, Flintstone).",
+    developersFormHeading: "Register New Project Development",
+    developersProjectsHeading: "Featured Developer Projects",
+    
+    // Admin Portal
+    adminTitle: "Platform Administration Dashboard (የሲስተሙ አስተዳዳሪዎች)",
+    adminSubtitle: "Review, approve, and verify submitted listings before public release.",
+    adminQueueHeading: "Pending Listings Review Queue",
+    adminApprovedHeading: "All Published Properties",
+    adminStatsHeading: "Platform Key Performance Indicators"
   },
   am: {
     brandName: "ቀዳሚ",
     brandTagline: "የኢትዮጵያ ቀዳሚ የሪል እስቴት መፈለጊያ ፖርታል",
+    navHome: "ቤቶችን ፈልግ",
+    navOwners: "የቤት ባለቤቶች",
+    navAgents: "ደላላዎች / ወኪሎች",
+    navDevelopers: "የሪል እስቴት አልሚዎች",
+    navAdmin: "የሲስተም አስተዳዳሪ",
+    navPostProperty: "ንብረት በነፃ ያስመዝግቡ",
     selectCity: "ከተማ፡",
     allCities: "ሁሉንም ከተሞች (አዲስ አበባ እና አዳማ)",
     addisAbaba: "አዲስ አበባ",
@@ -133,6 +170,31 @@ export const translations = {
     footerAbout: "ቀዳሚ (Kedami) በኢትዮጵያ ውስጥ ገዢዎችን፣ ተከራዮችን እና የሪል እስቴት አልሚዎችን የሚያገናኝ ቀዳሚው ዘመናዊ የቤት መፈለጊያ ቴክኖሎጂ ነው።",
     footerAddisTitle: "የአዲስ አበባ ቤቶች",
     footerAdamaTitle: "የአዳማ ቤቶች",
-    footerCopyright: "© 2026 ቀዳሚ (Kedami) የሪል እስቴት ፖርታል • በFastAPI፣ SQLite እና React የተሰራ።"
+    footerCopyright: "© 2026 ቀዳሚ (Kedami) የሪል እስቴት ፖርታል • በMERN Stack (MongoDB, Express, React, Node.js) የተሰራ።",
+    
+    // Owners Portal
+    ownersTitle: "የቤት ባለቤቶች መድረክ (Property Owners)",
+    ownersSubtitle: "አፓርታማዎን በቀጥታ ያከራዩ ወይም ቪላዎን ያለምንም ደላላ ክፍያ በአዲስ አበባ እና በአዳማ ይሽጡ።",
+    ownersFormHeading: "እንደ ቤት ባለቤት ንብረትዎን ያስመዝግቡ",
+    ownersListHeading: "ያስመዘገቧቸው ንቁ ቤቶች",
+    
+    // Agents Portal
+    agentsTitle: "የደላላዎችና የወኪሎች መድረክ (Agents & Brokers)",
+    agentsSubtitle: "ለደንበኞችዎ ቤቶችን ያስመዝግቡና የሚመጡትን የገዢና የተከራይ ጥያቄዎችን በቀላሉ ያስተዳድሩ።",
+    agentsFormHeading: "አዲስ የደንበኛ ቤት መረጃ ይመዝግቡ",
+    agentsLeadsHeading: "የደንበኞች ጥያቄዎችና ስልክ ቁጥሮች",
+    
+    // Developers Portal
+    developersTitle: "የሪል እስቴት አልሚዎች መድረክ (Builders & Developers)",
+    developersSubtitle: "ግዙፍ የመኖሪያ መንደሮችንና ፕሮጀክቶችን ያስተዋውቁ (ለምሳሌ አያት፣ ፀሐይ፣ ኖህ፣ ፍሊንትስቶን)።",
+    developersFormHeading: "አዲስ የመኖሪያ መንደር ፕሮጀክት ያስመዝግቡ",
+    developersProjectsHeading: "ተለይተው የቀረቡ ታዋቂ ፕሮጀክቶች",
+    
+    // Admin Portal
+    adminTitle: "የሲስተሙ አስተዳዳሪዎች መድረክ (Platform Admin)",
+    adminSubtitle: "ለህዝብ እይታ ከመልቀቃቸው በፊት አዳዲስ የተመዘገቡ ቤቶችን ይገምግሙ፣ ያረጋግጡና ያጽድቁ።",
+    adminQueueHeading: "በግምገማ ላይ ያሉ ያልፀደቁ ቤቶች",
+    adminApprovedHeading: "ሙሉ ለሙሉ የፀደቁ ቤቶች",
+    adminStatsHeading: "የፖርታሉ አጠቃላይ አሃዛዊ መረጃዎች"
   }
 };
