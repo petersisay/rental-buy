@@ -16,14 +16,14 @@ from schemas import Property as PropertySchema, ContactSubmissionCreate
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="MagicBricks Clone API",
-    description="Backend property search engine for Bangalore & Mumbai using SQLite and FastAPI."
+    title="Kedami (ቀዳሚ) Real Estate API",
+    description="Ethiopia's premier property search engine for Addis Ababa and Adama using SQLite and FastAPI."
 )
 
 # Enable CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify frontend domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,7 +43,11 @@ def get_properties(
     query = db.query(PropertyModel)
     
     if city:
-        query = query.filter(PropertyModel.city.ilike(city))
+        city_filter = f"%{city}%"
+        query = query.filter(
+            PropertyModel.city.ilike(city_filter) |
+            (PropertyModel.city_am.isnot(None) & PropertyModel.city_am.ilike(city_filter))
+        )
     if purpose:
         query = query.filter(PropertyModel.purpose == purpose.lower())
     if property_type:
@@ -62,9 +66,13 @@ def get_properties(
         search_filter = f"%{search}%"
         query = query.filter(
             PropertyModel.title.ilike(search_filter) | 
+            (PropertyModel.title_am.isnot(None) & PropertyModel.title_am.ilike(search_filter)) |
             PropertyModel.locality.ilike(search_filter) | 
+            (PropertyModel.locality_am.isnot(None) & PropertyModel.locality_am.ilike(search_filter)) |
             PropertyModel.description.ilike(search_filter) |
-            PropertyModel.amenities.ilike(search_filter)
+            (PropertyModel.description_am.isnot(None) & PropertyModel.description_am.ilike(search_filter)) |
+            PropertyModel.amenities.ilike(search_filter) |
+            (PropertyModel.amenities_am.isnot(None) & PropertyModel.amenities_am.ilike(search_filter))
         )
         
     return query.all()
@@ -78,7 +86,6 @@ def get_property(property_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/properties/{property_id}/contact")
 def contact_agent(property_id: int, contact: ContactSubmissionCreate, db: Session = Depends(get_db)):
-    # Check if property exists
     prop = db.query(PropertyModel).filter(PropertyModel.id == property_id).first()
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
@@ -96,6 +103,6 @@ def contact_agent(property_id: int, contact: ContactSubmissionCreate, db: Sessio
     
     return {
         "status": "success",
-        "message": "Your enquiry has been successfully submitted! A local property consultant will reach out to you shortly.",
+        "message": "መልእክትዎ በተሳካ ሁኔታ ደርሷል! የአካባቢው የሪል እስቴት ባለሙያ በቅርቡ ያነጋግርዎታል። (Your enquiry has been successfully submitted! A local property consultant will reach out to you shortly.)",
         "submission_id": db_submission.id
     }
