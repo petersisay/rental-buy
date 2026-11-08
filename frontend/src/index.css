@@ -1282,3 +1282,39 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Smooth Fade & Keyframe Animations for Landing & Modals */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes kenBurnsSlow {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06) translate(1%, -1%); }
+  100% { transform: scale(1); }
+}
+
+.animate-kenburns {
+  animation: kenBurnsSlow 20s infinite ease-in-out;
+}
+
+/* Modal Gallery Image Transitions */
+.modal-gallery-wrap {
+  position: relative;
+  width: 100%;
+  background: #0f172a;
+}
+
+.modal-thumbnails::-webkit-scrollbar {
+  height: 5px;
+}
+
+.modal-thumbnails::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
