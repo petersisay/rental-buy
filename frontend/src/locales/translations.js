@@ -194,7 +194,20 @@ export const translations = {
     adminStatusApproved: "Approved",
     adminStatusRejected: "Rejected",
     adminActionSuccessProp: "Property status updated successfully!",
-    adminActionSuccessUser: "User account status updated successfully!"
+    adminActionSuccessUser: "User account status updated successfully!",
+
+    // Customer Portal (Rent & Buy)
+    customerTitle: "Customer Portal (ደንበኞች / ተከራይና ገዥ)",
+    customerSubtitle: "Browse, inspect, and directly rent or buy verified apartments, villas, and mega real estate developments across Addis Ababa and Adama.",
+    customerTabBrowse: "Browse & Rent/Buy Properties",
+    customerTabInquiries: "My Rent & Buy Applications",
+    customerTabFavorites: "My Saved Shortlist",
+    customerTabProjects: "Developer Mega Projects",
+    customerRoleBadge: "Verified Customer",
+    customerBtnRentNow: "Rent This Property",
+    customerBtnBuyNow: "Buy This Property",
+    customerApplySuccess: "Your application has been submitted! The owner/agent will contact you shortly.",
+    customerNoAddNotice: "Customers can directly rent and buy properties. To post a new listing, register with an Owner, Broker, or Developer account."
   },
 
   am: {
@@ -392,6 +405,19 @@ export const translations = {
     adminStatusApproved: "የፀደቀ",
     adminStatusRejected: "ውድቅ የተደረገ",
     adminActionSuccessProp: "የቤቱ ሁኔታ በተሳካ ሁኔታ ተቀይሯል!",
-    adminActionSuccessUser: "የተጠቃሚው መለያ ሁኔታ በተሳካ ሁኔታ ተቀይሯል!"
+    adminActionSuccessUser: "የተጠቃሚው መለያ ሁኔታ በተሳካ ሁኔታ ተቀይሯል!",
+
+    // Customer Portal (Rent & Buy)
+    customerTitle: "የደንበኞች መድረክ (Customer - Rent & Buy)",
+    customerSubtitle: "በአዲስ አበባ እና በአዳማ ውስጥ የተረጋገጡ አፓርታማዎችን፣ ቪላዎችን እና የሪል እስቴት ፕሮጀክቶችን በቀጥታ ይከራዩ ወይም ይግዙ።",
+    customerTabBrowse: "ቤቶችን ያስሱና ይከራዩ/ይግዙ",
+    customerTabInquiries: "የእኔ የኪራይና የግዢ ማመልከቻዎች",
+    customerTabFavorites: "የተመረጡ ቤቶች",
+    customerTabProjects: "የሪል እስቴት አልሚዎች ፕሮጀክቶች",
+    customerRoleBadge: "የተረጋገጠ ደንበኛ",
+    customerBtnRentNow: "አሁን ይከራዩ",
+    customerBtnBuyNow: "አሁን ይግዙ",
+    customerApplySuccess: "ማመልከቻዎ በተሳካ ሁኔታ ደርሷል! ባለቤቱ ወይም ወኪሉ በቅርቡ ያነጋግርዎታል።",
+    customerNoAddNotice: "ደንበኞች ቤቶችን በቀጥታ መከራየት እና መግዛት ይችላሉ፤ አዲስ ቤት ለመለጠፍ የቤት ባለቤት፣ ደላላ ወይም አልሚ መለያ ያስፈልጋል።"
   }
 };
