@@ -7,7 +7,17 @@
 ## 🇪🇹 Key Features
 
 - **MERN Stack Architecture**: Pure JavaScript / Node.js throughout: MongoDB + Mongoose, Express.js REST API, React 19 (Vite) frontend, Node.js runtime.
-- **Hero Landing Page with Animated Background**: Smooth transitioning architectural imagery showcasing Addis Ababa and Adama residences, trust metrics, quick search overlay, and developer highlights.
+- **Hero Landing Page (First View for Visitors)**:
+  - Visitors land directly on the animated landing page showcasing prime residences across Addis Ababa and Adama.
+  - **Hidden Role Navigation**: The role navigation bar is strictly hidden until the user signs in or registers, keeping the initial interface clean, intuitive, and welcoming.
+  - Prominent **Sign In / Sign Up** buttons guide visitors to authenticate or create their accounts.
+- **Role-Based Authentication & Navigation**:
+  - Sign in with Google Account or email address, or choose **Sign Up** to create a new profile with a chosen role (Owner, Broker, Developer, Seeker), city, and company.
+  - **Dynamic Post-Login Rendering**: Upon authentication, users are automatically routed directly to their role-specific dashboard (e.g. Owners to Owner Portal, Brokers to Agent Portal, Developers to Developer Portal, Admin to Admin Portal, Seekers to Property Search).
+  - Navigation tabs are tailored to the authenticated user's permission level.
+- **Dedicated User Profile (`ProfilePage`)**:
+  - Each authenticated user has their own profile page showing personal information, role badge, approval status, city, company, and quick metrics (properties listed, bookmarked homes).
+  - Inline profile editing allowing users to update their full name, phone number, city, and company with backend persistence (`PATCH /api/auth/users/:id/profile`).
 - **Separate Google & Email Authentication**:
   - Sign in with Google Account or email address.
   - Role selection for **Property Owner**, **Agent / Broker**, **Developer**, or **Seeker / Buyer**.
