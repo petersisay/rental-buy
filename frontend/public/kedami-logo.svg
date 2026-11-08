@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 170" width="100%" height="100%">
+  <defs>
+    <!-- Rich 3D Gold Gradient for Letters & Crown -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFEAA7" />
+      <stop offset="25%" stop-color="#FDB813" />
+      <stop offset="60%" stop-color="#F59E0B" />
+      <stop offset="85%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#92400E" />
+    </linearGradient>
+
+    <!-- Metallic Crown Gradient -->
+    <linearGradient id="crownGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFF5C0" />
+      <stop offset="30%" stop-color="#FACC15" />
+      <stop offset="70%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#CA8A04" />
+    </linearGradient>
+
+    <!-- White Chrome Gradient for the First Letter 'ቀ' -->
+    <linearGradient id="whiteLetterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="65%" stop-color="#F8FAFC" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+
+    <!-- Dynamic Swoosh Golden Arc Gradient -->
+    <linearGradient id="arcGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0" />
+      <stop offset="20%" stop-color="#F59E0B" />
+      <stop offset="55%" stop-color="#FDE047" />
+      <stop offset="85%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Secondary Silver Accent Arc -->
+    <linearGradient id="silverArcGrad" x1="10%" y1="0%" x2="90%" y2="0%">
+      <stop offset="0%" stop-color="#CBD5E1" stop-opacity="0" />
+      <stop offset="35%" stop-color="#F8FAFC" />
+      <stop offset="75%" stop-color="#CBD5E1" />
+      <stop offset="100%" stop-color="#94A3B8" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Soft Drop Shadow for Depth -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="5" stdDeviation="4" flood-color="#020617" flood-opacity="0.45" />
+    </filter>
+    
+    <!-- Golden Star Glow -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- ========================================== -->
+    <!-- 1. DYNAMIC SWOOSHING ARCS BENEATH / AROUND -->
+    <!-- ========================================== -->
+    <!-- Main Sweeping Golden Arc -->
+    <path 
+      d="M 28 126 C 65 142, 135 152, 225 144 C 335 134, 400 95, 428 58 C 438 45, 436 32, 422 28 C 408 24, 386 38, 380 44 C 400 40, 416 48, 410 59 C 392 90, 328 126, 222 134 C 130 140, 68 128, 32 114 Z" 
+      fill="url(#arcGrad)"
+    />
+
+    <!-- Inner Silver-White Lightning Streak -->
+    <path 
+      d="M 52 134 C 110 148, 210 149, 312 130 C 378 117, 412 88, 420 72 C 405 85, 360 110, 298 122 C 196 140, 108 138, 56 128 Z" 
+      fill="url(#silverArcGrad)"
+    />
+
+    <!-- ========================================== -->
+    <!-- 2. THE WORD: 'ቀዳሚ' (TYPOGRAPHY)           -->
+    <!-- ========================================== -->
+
+    <!-- Letter 1: 'ቀ' (Sculpted Crisp White with Crown) -->
+    <!-- Dark 3D Base/Extrusion for 'ቀ' -->
+    <g transform="translate(48, 36)">
+      <!-- Crown on top of 'ቀ' -->
+      <g transform="translate(18, -26) scale(0.92)">
+        <!-- Crown Base Band -->
+        <path d="M 12 28 C 28 32, 48 32, 64 28 L 62 33 C 48 37, 28 37, 14 33 Z" fill="#92400E" />
+        <path d="M 13 27 C 28 31, 48 31, 63 27 L 61 31 C 48 35, 28 35, 15 31 Z" fill="url(#crownGrad)" />
+        
+        <!-- Crown Jewels along the band -->
+        <circle cx="23" cy="29" r="1.8" fill="#EF4444" />
+        <circle cx="38" cy="30" r="2.2" fill="#10B981" />
+        <circle cx="53" cy="29" r="1.8" fill="#3B82F6" />
+
+        <!-- 5 Royal Spikes / Peaks -->
+        <path 
+          d="M 12 28 L 5 10 L 22 20 L 38 4 L 54 20 L 71 10 L 64 28 C 48 32, 28 32, 12 28 Z" 
+          fill="url(#crownGrad)" 
+          stroke="#92400E" 
+          stroke-width="1.2"
+        />
+        
+        <!-- Golden Globes atop each peak -->
+        <circle cx="5" cy="10" r="3.2" fill="#FEF08A" stroke="#B45309" stroke-width="0.8" />
+        <circle cx="22" cy="20" r="2.6" fill="#FEF08A" stroke="#B45309" stroke-width="0.8" />
+        <circle cx="38" cy="4" r="4.2" fill="#FEF08A" stroke="#B45309" stroke-width="0.8" />
+        <circle cx="54" cy="20" r="2.6" fill="#FEF08A" stroke="#B45309" stroke-width="0.8" />
+        <circle cx="71" cy="10" r="3.2" fill="#FEF08A" stroke="#B45309" stroke-width="0.8" />
+      </g>
+
+      <!-- The Letter 'ቀ' Body: Bold, Clean & Stylized -->
+      <!-- Shadow outline -->
+      <path 
+        d="M 28 22 C 10 22, -2 38, 0 58 C 2 76, 16 88, 36 88 L 36 102 C 36 107, 44 110, 49 105 L 53 100 L 53 88 C 72 87, 86 73, 85 54 C 84 36, 68 22, 48 22 Z M 44 40 C 56 40, 64 47, 64 56 C 64 65, 55 72, 42 72 C 30 72, 21 65, 21 56 C 21 47, 30 40, 44 40 Z" 
+        fill="#0F172A" 
+        transform="translate(2, 3)"
+      />
+      <!-- Front White Chrome Glyph -->
+      <path 
+        d="M 28 22 C 10 22, -2 38, 0 58 C 2 76, 16 88, 36 88 L 36 102 C 36 107, 44 110, 49 105 L 53 100 L 53 88 C 72 87, 86 73, 85 54 C 84 36, 68 22, 48 22 Z M 44 40 C 56 40, 64 47, 64 56 C 64 65, 55 72, 42 72 C 30 72, 21 65, 21 56 C 21 47, 30 40, 44 40 Z" 
+        fill="url(#whiteLetterGrad)" 
+        stroke="#E2E8F0" 
+        stroke-width="1.5"
+      />
+      <!-- Gloss Highlight on 'ቀ' -->
+      <path 
+        d="M 25 25 C 14 26, 6 36, 4 48 C 12 36, 26 31, 46 31 C 60 31, 72 36, 78 44 C 76 33, 64 25, 48 25 Z" 
+        fill="#FFFFFF" 
+        opacity="0.75"
+      />
+    </g>
+
+    <!-- Letters 2 & 3: 'ዳ' and 'ሚ' (Rich Radiant Gold Script) -->
+    <!-- 'ዳ' (Da) -->
+    <g transform="translate(148, 38)">
+      <!-- 3D Depth Shadow for 'ዳ' -->
+      <path 
+        d="M 8 72 C 14 62, 24 54, 38 52 C 48 50, 56 45, 62 38 L 60 35 C 50 35, 40 37, 30 40 C 22 36, 18 28, 22 20 C 28 8, 44 4, 62 6 C 78 8, 88 18, 88 32 C 88 48, 76 60, 62 66 C 54 70, 46 76, 40 84 C 36 89, 30 92, 22 92 C 12 92, 4 84, 8 72 Z" 
+        fill="#78350F" 
+        transform="translate(2, 3)"
+      />
+      <!-- Golden Body for 'ዳ' -->
+      <path 
+        d="M 8 72 C 14 62, 24 54, 38 52 C 48 50, 56 45, 62 38 L 60 35 C 50 35, 40 37, 30 40 C 22 36, 18 28, 22 20 C 28 8, 44 4, 62 6 C 78 8, 88 18, 88 32 C 88 48, 76 60, 62 66 C 54 70, 46 76, 40 84 C 36 89, 30 92, 22 92 C 12 92, 4 84, 8 72 Z" 
+        fill="url(#goldGrad)" 
+        stroke="#92400E" 
+        stroke-width="1.2"
+      />
+      <!-- Golden Highlight Edge for 'ዳ' -->
+      <path 
+        d="M 28 18 C 34 10, 48 8, 62 10 C 72 12, 80 18, 82 26 C 75 20, 66 16, 52 16 C 38 16, 28 20, 24 26 C 24 22, 26 20, 28 18 Z" 
+        fill="#FEF08A" 
+        opacity="0.8"
+      />
+    </g>
+
+    <!-- 'ሚ' (Mi) with Sweeping Terminal Curve -->
+    <g transform="translate(254, 34)">
+      <!-- 3D Shadow for 'ሚ' -->
+      <path 
+        d="M 12 28 C 16 12, 34 2, 56 4 C 76 6, 92 18, 92 34 C 92 50, 78 62, 58 66 L 54 67 C 68 70, 78 78, 84 90 C 88 98, 96 104, 108 106 C 114 107, 116 112, 112 116 C 104 122, 90 120, 80 110 C 70 98, 60 88, 46 86 L 36 85 L 36 102 C 36 108, 28 112, 22 108 C 16 104, 16 98, 16 90 L 16 58 C 8 52, 4 42, 12 28 Z M 38 24 C 28 24, 22 30, 22 38 C 22 46, 28 52, 38 52 C 48 52, 56 46, 56 38 C 56 30, 48 24, 38 24 Z" 
+        fill="#78350F" 
+        transform="translate(2, 3)"
+      />
+      <!-- Golden Body for 'ሚ' -->
+      <path 
+        d="M 12 28 C 16 12, 34 2, 56 4 C 76 6, 92 18, 92 34 C 92 50, 78 62, 58 66 L 54 67 C 68 70, 78 78, 84 90 C 88 98, 96 104, 108 106 C 114 107, 116 112, 112 116 C 104 122, 90 120, 80 110 C 70 98, 60 88, 46 86 L 36 85 L 36 102 C 36 108, 28 112, 22 108 C 16 104, 16 98, 16 90 L 16 58 C 8 52, 4 42, 12 28 Z M 38 24 C 28 24, 22 30, 22 38 C 22 46, 28 52, 38 52 C 48 52, 56 46, 56 38 C 56 30, 48 24, 38 24 Z" 
+        fill="url(#goldGrad)" 
+        stroke="#92400E" 
+        stroke-width="1.2"
+      />
+      <!-- Golden Highlight Edge for 'ሚ' -->
+      <path 
+        d="M 30 14 C 42 8, 58 8, 70 12 C 80 16, 86 24, 86 32 C 80 24, 70 18, 56 16 C 42 16, 32 20, 26 26 C 26 20, 28 16, 30 14 Z" 
+        fill="#FEF08A" 
+        opacity="0.8"
+      />
+    </g>
+
+    <!-- ========================================== -->
+    <!-- 3. SPARKLING 4-POINT GOLDEN STAR (✦)       -->
+    <!-- ========================================== -->
+    <g transform="translate(352, 18)" filter="url(#glow)">
+      <!-- 4-point Diamond Star -->
+      <path 
+        d="M 16 0 Q 16 16 0 16 Q 16 16 16 32 Q 16 16 32 16 Q 16 16 16 0 Z" 
+        fill="#FDE047" 
+        stroke="#F59E0B" 
+        stroke-width="0.8"
+      />
+      <!-- Center Bright Core -->
+      <circle cx="16" cy="16" r="3.2" fill="#FFFFFF" />
+      
+      <!-- Miniature Companion Sparkle -->
+      <path 
+        d="M 36 4 Q 36 10 30 10 Q 36 10 36 16 Q 36 10 42 10 Q 36 10 36 4 Z" 
+        fill="#FEF08A" 
+        opacity="0.9"
+      />
+    </g>
+  </g>
+</svg>
