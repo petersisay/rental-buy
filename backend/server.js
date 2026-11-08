@@ -53,8 +53,12 @@ async function connectDB() {
     const userCount = await User.countDocuments();
     if (userCount === 0) {
       console.log('Seeding initial demo users and pending signups...');
-      await User.insertMany(seedUsers);
-      console.log('✅ Users seeded.');
+      try {
+        await User.insertMany(seedUsers, { ordered: false });
+        console.log('✅ Users seeded.');
+      } catch (seedErr) {
+        console.log('ℹ️ Users seed note:', seedErr.message);
+      }
     }
   } catch (err) {
     console.warn(`⚠️ Local MongoDB connection failed (${err.message}).`);
@@ -183,8 +187,17 @@ app.post('/api/auth/demo-login', async (req, res) => {
       if (!user) {
         const seedMatch = seedUsers.find(u => u.email === targetEmail);
         if (seedMatch) {
-          user = new User(seedMatch);
+          const { _id, id, ...cleanData } = seedMatch;
+          user = new User(cleanData);
           await user.save();
+        } else {
+          user = await User.create({
+            name: `${targetRole.charAt(0).toUpperCase() + targetRole.slice(1)} Demo`,
+            email: targetEmail,
+            role: targetRole === 'seeker' ? 'customer' : targetRole,
+            status: 'approved',
+            city: 'Addis Ababa'
+          });
         }
       }
       return res.json({ user });
@@ -192,7 +205,19 @@ app.post('/api/auth/demo-login', async (req, res) => {
       let user = inMemoryUsers.find(u => u.email === targetEmail);
       if (!user) {
         user = seedUsers.find(u => u.email === targetEmail);
-        if (user) inMemoryUsers.push(user);
+        if (user) {
+          inMemoryUsers.push(user);
+        } else {
+          user = {
+            id: `usr-demo-${Date.now()}`,
+            name: `${targetRole} Demo`,
+            email: targetEmail,
+            role: targetRole === 'seeker' ? 'customer' : targetRole,
+            status: 'approved',
+            city: 'Addis Ababa'
+          };
+          inMemoryUsers.push(user);
+        }
       }
       return res.json({ user });
     }
