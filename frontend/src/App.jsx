@@ -20,9 +20,21 @@ import { RefreshCw, AlertCircle } from 'lucide-react';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 export default function App() {
-  // Logged-in User State (Persisted in localStorage)
+  // Logged-in User State (Persisted in localStorage or demo preview query param)
   const [currentUser, setCurrentUser] = useState(() => {
     try {
+      const params = new URLSearchParams(window.location.search);
+      const demoRole = params.get('demo');
+      if (demoRole) {
+        return {
+          id: `demo-${demoRole}-1`,
+          name: demoRole === 'customer' ? 'Abebe Bikila' : demoRole === 'admin' ? 'System Administrator' : 'Demo User',
+          email: `${demoRole}.demo@kedami.et`,
+          role: demoRole,
+          status: 'approved',
+          city: 'Addis Ababa'
+        };
+      }
       const saved = localStorage.getItem('kedami_user');
       return saved ? JSON.parse(saved) : null;
     } catch {
@@ -30,8 +42,16 @@ export default function App() {
     }
   });
 
-  // Active Portal/Page State: default is 'landing' (First Landing Page view)
-  const [activePortal, setActivePortal] = useState('landing');
+  // Active Portal/Page State: default is 'landing' (First Landing Page view) or URL hash
+  const [activePortal, setActivePortal] = useState(() => {
+    try {
+      const hash = window.location.hash.replace('#', '');
+      if (['login', 'search', 'owners', 'agents', 'developers', 'admin', 'customer', 'profile'].includes(hash)) {
+        return hash;
+      }
+    } catch {}
+    return 'landing';
+  });
   const [loginOptions, setLoginOptions] = useState({ role: 'seeker', mode: 'login' });
 
   // Language State: Amharic ('am') or English ('en')
