@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --primary: #009a44;          /* Ethiopian Forest Green */
   --primary-hover: #007a35;
