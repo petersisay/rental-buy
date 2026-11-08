@@ -27,7 +27,9 @@ export default function Navbar({
       case 'owner': return isAmharic ? 'ባለቤት' : 'Owner';
       case 'agent': return isAmharic ? 'ደላላ/ወኪል' : 'Agent';
       case 'developer': return isAmharic ? 'አልሚ' : 'Developer';
-      default: return isAmharic ? 'ተጠቃሚ' : 'Seeker';
+      case 'customer':
+      case 'seeker': return isAmharic ? 'ደንበኛ' : 'Customer';
+      default: return isAmharic ? 'ደንበኛ' : 'Customer';
     }
   };
 
@@ -37,6 +39,8 @@ export default function Navbar({
       case 'owner': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       case 'agent': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'developer': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'customer':
+      case 'seeker': return 'bg-teal-100 text-teal-800 border-teal-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -240,6 +244,15 @@ export default function Navbar({
               >
                 {t.navHome}
               </button>
+              {(currentUser.role === 'customer' || currentUser.role === 'seeker') && (
+                <button
+                  type="button"
+                  onClick={() => { onNavigate('customer'); setMobileMenuOpen(false); }}
+                  className="p-2.5 bg-teal-50 text-teal-800 rounded-xl text-xs font-bold text-left"
+                >
+                  {t.navCustomer || 'የደንበኞች ፖርታል (ኪራይ / ግዢ)'}
+                </button>
+              )}
               {currentUser.role === 'owner' && (
                 <button
                   type="button"
