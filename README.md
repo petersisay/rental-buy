@@ -1,6 +1,40 @@
 # ቀዳሚ (Kedami) - Ethiopian Real Estate MERN Portal
 
-**ቀዳሚ (Kedami)** is an Ethiopian real estate platform built on the **MERN Stack (MongoDB, Express, React, Node.js)**. Designed for finding, buying, and renting residential properties in **Addis Ababa (አዲስ አበባ)** and **Adama (አዳማ)** with full **Amharic (አማርኛ)** and English language options, **Ethiopian Birr (ETB)** pricing, Google Account authentication with Admin verification, and dedicated role portals for **Property Owners**, **Agents**, **Developers**, and **Platform Administrators**.
+<div align="center">
+  <img src="frontend/public/assets/kedami-logo.jpg" alt="ቀዳሚ Logo" width="120" style="border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);" />
+  <h3>የኢትዮጵያ ቁጥር 1 ዘመናዊ የቤት መፈለጊያ ፖርታል</h3>
+  <p><strong>Addis Ababa (አዲስ አበባ) & Adama (አዳማ) • 100% MERN Stack • Bilingual Amharic & English</strong></p>
+</div>
+
+---
+
+## 📸 Project Screenshots
+
+### 1. Modern Landing Page (Public View)
+> Visitors land on a sleek, responsive landing page with prominent search filters, language switcher, and authentication actions. Role-specific navigation remains cleanly hidden until login.
+
+![Kedami Landing Page](docs/screenshots/landing-hero.png)
+
+---
+
+### 2. Customer Portal — Rent & Buy (የደንበኞች ፖርታል)
+> Tailored interface for homebuyers and renters to browse 20+ verified listings across Addis Ababa and Adama with Ethiopian Birr (ETB) pricing, schedule in-person tours, and track inquiries in real-time.
+
+![Customer Portal](docs/screenshots/customer-portal.png)
+
+---
+
+### 3. Authentication & 1-Click Demo Profiles (የመግቢያ ገጽ)
+> Direct Google Account sign-in for customers and email credentials for all roles, along with instant 1-Click Demo Profiles for testing every permission tier.
+
+![Login and Demo Accounts](docs/screenshots/login-page.png)
+
+---
+
+### 4. Platform Administrator Console & Linked Footer (የሲስተሙ አስተዳዳሪዎች)
+> Comprehensive platform KPI dashboard and admin review queue to inspect, approve, or reject new user registrations and property submissions, paired with a fully interactive locality-linked footer.
+
+![Platform Administrator Console](docs/screenshots/admin-portal.png)
 
 ---
 
@@ -11,10 +45,10 @@
   - Visitors land directly on the animated landing page showcasing prime residences across Addis Ababa and Adama.
   - **Hidden Role Navigation**: The role navigation bar is strictly hidden until the user signs in or registers, keeping the initial interface clean, intuitive, and welcoming.
   - Prominent **Sign In / Sign Up** buttons guide visitors to authenticate or create their accounts.
-- **Role-Based Authentication & Navigation**:
-  - Sign in with Google Account or email address, or choose **Sign Up** to create a new profile with a chosen role (Owner, Broker, Developer, Seeker), city, and company.
-  - **Dynamic Post-Login Rendering**: Upon authentication, users are automatically routed directly to their role-specific dashboard (e.g. Owners to Owner Portal, Brokers to Agent Portal, Developers to Developer Portal, Admin to Admin Portal, Seekers to Property Search).
-  - Navigation tabs are tailored to the authenticated user's permission level.
+- **Role-Based Authentication & Dynamic Routing**:
+  - Sign in with Google Account or email address, or choose **Sign Up** to create a new profile with a chosen role (Owner, Broker, Developer, Customer).
+  - **Dynamic Post-Login Rendering**: Upon authentication, users are automatically routed directly to their role-specific dashboard (e.g. Owners to Owner Portal, Brokers to Agent Portal, Developers to Developer Portal, Admin to Admin Portal, Customers to Customer Hub).
+  - Navigation tabs dynamically adapt to the authenticated user's permission level.
 - **Dedicated Customer Role & Portal (Rent & Buy)**:
   - **Direct Google Sign-In**: Customers can sign in directly using their Google account without requiring admin review wait times (`status: 'approved'`).
   - **Rent & Buy Hub**: Filter by Rent vs. Buy, Addis Ababa & Adama localities, property types, and ETB pricing tiers.
@@ -25,22 +59,19 @@
 - **Dedicated User Profile (`ProfilePage`)**:
   - Each authenticated user has their own profile page showing personal information, role badge, approval status, city, company, and quick metrics (properties listed, bookmarked homes).
   - Inline profile editing allowing users to update their full name, phone number, city, and company with backend persistence (`PATCH /api/auth/users/:id/profile`).
-- **Separate Google & Email Authentication**:
-  - Sign in with Google Account or email address.
-  - Role selection for **Property Owner**, **Agent / Broker**, **Developer**, or **Seeker / Buyer**.
-  - **1-Click Demo Accounts**: Instant access profiles to test every role without registration:
-    - 🛡️ **Platform Administrator**: `admin@kedami.et`
-    - 🏠 **Property Owner Demo**: `owner.demo@kedami.et`
-    - 🏢 **Real Estate Broker Demo**: `agent.demo@kedami.et`
-    - 🏗️ **Developer Rep Demo**: `developer.demo@kedami.et`
-    - 🔍 **Renter / Buyer Demo**: `seeker.demo@kedami.et`
+- **1-Click Demo Profiles for Rapid Testing**:
+  - 🛡️ **Platform Administrator**: `admin@kedami.et`
+  - 🔑 **Customer / Seeker Demo**: `customer.demo@kedami.et`
+  - 🏠 **Property Owner Demo**: `owner.demo@kedami.et`
+  - 🏢 **Real Estate Broker Demo**: `agent.demo@kedami.et`
+  - 🏗️ **Developer Rep Demo**: `developer.demo@kedami.et`
 - **Dual Administrator Approval Governance**:
   1. 👤 **User Sign-In Approvals**: New self-registered users entering roles (Owner, Broker, Developer) are held in an Admin Review Queue until approved.
   2. 🏠 **Property Listing Approvals**: Newly submitted properties from owners, brokers, and developers enter the review queue with photos and pricing before going live publicly.
 - **Multi-Photo Image Uploads**:
   - Direct local file upload from device with preview thumbnails.
   - Image URL input.
-  - 1-click curated Ethiopian property sample photo chips (Bole Modern Flat, Old Airport Villa, Adama Townhouse, Living Room, European Kitchen).
+  - Curated Ethiopian property sample photo chips (Bole Modern Flat, Old Airport Villa, Adama Townhouse, Living Room, European Kitchen).
   - Multi-image gallery carousel in property inspection modal.
 - **Dedicated Portals for Every Role**:
   1. 🔑 **Customers / Renters & Buyers (የደንበኞች ፖርታል - ኪራይና ግዢ)**: Browse and filter verified properties to rent or buy, request in-person viewing tours, submit inquiries directly to landlords/developers, and track communications.
@@ -61,36 +92,15 @@
 
 ---
 
-## ☁️ Deployment
-
-### 1. Frontend on Vercel
-- Root directory: `frontend`
-- Build command: `npm run build`
-- Output directory: `dist`
-- Configured with `frontend/vercel.json` for client-side SPA routing.
-
-### 2. Backend on Render + MongoDB
-- Root directory: `backend`
-- Environment: `Node`
-- Build command: `npm install`
-- Start command: `npm start`
-- Configured with `backend/render.yaml`
-- Set `MONGODB_URI` environment variable to your MongoDB Atlas connection string:
-  ```
-  mongodb+srv://<username>:<password>@cluster0.mongodb.net/kedami?retryWrites=true&w=majority
-  ```
-
----
-
 ## 💻 Local Development Setup
 
-### 1. Backend (Express & MongoDB / In-Memory Fallback)
+### 1. Backend (Express & MongoDB)
 ```bash
 cd backend
 npm install
 npm start
 ```
-The server will start on `http://localhost:8000`. If a local MongoDB instance is not detected, it automatically operates in resilient fallback mode pre-loaded with the 20 Ethiopian listings, developer projects, and demo users!
+The server will start on `http://localhost:8000`. If a local or remote MongoDB instance is configured via `MONGODB_URI`, it connects automatically; otherwise, it operates in resilient fallback mode pre-loaded with the 20 Ethiopian listings, developer projects, and demo users.
 
 ### 2. Frontend (React + Vite)
 ```bash
