@@ -1,14 +1,14 @@
 import React from 'react';
 
 /**
- * KedamiLogo: Premium Royal Crowned Ethiopian Logo
- * Combines the stylized word "ቀዳሚ" with the Royal Golden Crown on "ቀ",
- * the 4-point shining star, and the dynamic golden/silver swoosh.
+ * KedamiLogo: Modern Ethiopian Real Estate Monogram Logo
+ * Combines the iconic orange "ቀ" + "R" ligature emblem on a dark backdrop
+ * with crisp typography for "ቀዳሚ (Kedami)" and the "ET" badge.
  *
  * Props:
- * - variant: 'image' | 'svg' | 'badge' (defaults to 'image' using user's royal reference artwork)
+ * - variant: 'image' | 'svg' | 'badge' (defaults to 'image' using the user's high-res monogram asset)
  * - size: 'sm' (h-8) | 'md' (h-10) | 'lg' (h-14) | 'xl' (h-20)
- * - showSubtitle: boolean (renders 'የኢትዮጵያ ቁጥር 1 የቤት መድረክ' / 'Ethiopia's #1 Property Portal')
+ * - showSubtitle: boolean (renders 'የኢትዮጵያ ቁጥር 1 የቤት መድረክ' / 'Ethiopia's #1 Real Estate')
  * - isDark: boolean (adapts typography contrast)
  * - lang: 'am' | 'en'
  */
@@ -24,10 +24,10 @@ export default function KedamiLogo({
 
   // Size styling maps
   const heightClasses = {
-    sm: 'h-8',
-    md: 'h-10 sm:h-11',
-    lg: 'h-14 sm:h-16',
-    xl: 'h-20 sm:h-24'
+    sm: 'h-8 w-8',
+    md: 'h-10 w-10 sm:h-11 sm:w-11',
+    lg: 'h-14 w-14 sm:h-16 sm:w-16',
+    xl: 'h-20 w-20 sm:h-24 sm:w-24'
   };
 
   const badgeSizeClasses = {
@@ -39,14 +39,14 @@ export default function KedamiLogo({
 
   return (
     <div className={`inline-flex items-center gap-3 select-none ${className}`}>
-      {/* 1. Main Logo Graphic */}
+      {/* 1. Main Monogram Graphic */}
       {variant === 'image' ? (
         <div className="relative group flex items-center">
-          <div className="relative overflow-hidden rounded-xl bg-slate-950 p-1 shadow-md shadow-amber-900/10 border border-amber-500/20 transition-transform duration-300 group-hover:scale-105">
+          <div className="relative overflow-hidden rounded-2xl bg-[#12151c] p-0.5 shadow-md shadow-orange-950/20 border border-orange-500/30 transition-transform duration-300 group-hover:scale-105">
             <img
               src="/assets/kedami-logo.jpg"
               alt="ቀዳሚ (Kedami) Logo"
-              className={`${heightClasses[size]} w-auto object-contain rounded-lg`}
+              className={`${heightClasses[size]} object-contain rounded-xl`}
               onError={(e) => {
                 // Fallback to SVG if image fails
                 e.currentTarget.src = '/kedami-logo.svg';
@@ -59,14 +59,12 @@ export default function KedamiLogo({
           <img
             src="/kedami-logo.svg"
             alt="ቀዳሚ Logo"
-            className={`${heightClasses[size]} w-auto object-contain transition-transform duration-300 group-hover:scale-105`}
+            className={`${heightClasses[size]} object-contain rounded-xl transition-transform duration-300 group-hover:scale-105`}
           />
         </div>
       ) : (
-        /* Crowned Badge Variant */
-        <div className={`relative ${badgeSizeClasses[size]} rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 flex items-center justify-center text-white font-black shadow-lg shadow-amber-500/25 border border-yellow-200/50`}>
-          {/* Mini Crown */}
-          <span className="absolute -top-2 text-xs filter drop-shadow">👑</span>
+        /* Monogram Badge Variant */
+        <div className={`relative ${badgeSizeClasses[size]} rounded-2xl bg-[#12151c] border border-orange-500/50 flex items-center justify-center text-orange-400 font-black shadow-lg shadow-orange-900/20`}>
           <span className="tracking-tighter">ቀ</span>
         </div>
       )}
@@ -82,13 +80,13 @@ export default function KedamiLogo({
             >
               {isAmharic ? 'ቀዳሚ' : 'Kedami'}
             </span>
-            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 uppercase tracking-wider shadow-xs font-mono">
+            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-400 text-slate-950 uppercase tracking-wider shadow-xs font-mono">
               ET
             </span>
           </div>
           <span
             className={`text-[11px] font-medium tracking-tight mt-1 truncate ${
-              isDark ? 'text-amber-200/80' : 'text-gray-500'
+              isDark ? 'text-orange-200/80' : 'text-gray-500'
             }`}
           >
             {isAmharic ? 'የኢትዮጵያ ቁጥር 1 የቤት መድረክ' : "Ethiopia's #1 Real Estate"}
