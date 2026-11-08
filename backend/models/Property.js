@@ -139,4 +139,10 @@ propertySchema.set('toJSON', {
   }
 });
 
+// Production Database Performance Indexes for MongoDB Atlas
+propertySchema.index({ city: 1, purpose: 1, status: 1 });
+propertySchema.index({ locality: 1, city: 1 });
+propertySchema.index({ price: 1 });
+propertySchema.index({ createdAt: -1 });
+
 export const Property = mongoose.models.Property || mongoose.model('Property', propertySchema);
