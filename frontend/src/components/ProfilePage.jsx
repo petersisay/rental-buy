@@ -40,7 +40,9 @@ export default function ProfilePage({
       case 'agent': return isAmharic ? 'ደላላ / ወኪል (Real Estate Broker)' : 'Licensed Broker / Agent';
       case 'developer': return isAmharic ? 'የሪል እስቴት አልሚ (Developer)' : 'Real Estate Developer';
       case 'admin': return isAmharic ? 'የሲስተም አስተዳዳሪ (Platform Admin)' : 'Platform Administrator';
-      default: return isAmharic ? 'ተከራይ / ገዢ (Property Seeker)' : 'Property Seeker';
+      case 'customer':
+      case 'seeker': return isAmharic ? 'ቀዳሚ ደንበኛ (ተከራይ / ገዢ)' : 'Kedami Customer (Renter / Buyer)';
+      default: return isAmharic ? 'ቀዳሚ ደንበኛ (ተከራይ / ገዢ)' : 'Kedami Customer (Renter / Buyer)';
     }
   };
 
@@ -50,7 +52,9 @@ export default function ProfilePage({
       case 'agent': return 'agents';
       case 'developer': return 'developers';
       case 'admin': return 'admin';
-      default: return 'search';
+      case 'customer':
+      case 'seeker': return 'customer';
+      default: return 'customer';
     }
   };
 
