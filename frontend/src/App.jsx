@@ -12,6 +12,7 @@ import OwnerPortal from './components/OwnerPortal';
 import AgentPortal from './components/AgentPortal';
 import DeveloperPortal from './components/DeveloperPortal';
 import AdminPortal from './components/AdminPortal';
+import CustomerPortal from './components/CustomerPortal';
 import { translations } from './locales/translations';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
@@ -67,14 +68,15 @@ export default function App() {
     }
 
     // Role-protected pages require authentication
-    const protectedPortals = ['owners', 'agents', 'developers', 'admin', 'profile'];
+    const protectedPortals = ['owners', 'agents', 'developers', 'admin', 'profile', 'customer'];
     if (!currentUser && protectedPortals.includes(portal)) {
       // Map portal to requested role
-      let targetRole = 'seeker';
+      let targetRole = 'customer';
       if (portal === 'owners') targetRole = 'owner';
       if (portal === 'agents') targetRole = 'agent';
       if (portal === 'developers') targetRole = 'developer';
       if (portal === 'admin') targetRole = 'admin';
+      if (portal === 'customer') targetRole = 'customer';
 
       setLoginOptions({ role: targetRole, mode: 'login' });
       setActivePortal('login');
@@ -104,7 +106,7 @@ export default function App() {
     } else if (user.role === 'developer') {
       setActivePortal('developers');
     } else {
-      setActivePortal('search');
+      setActivePortal('customer');
     }
   };
 
@@ -374,7 +376,22 @@ export default function App() {
         />
       )}
 
-      {/* 4. Main Search & Property Browsing View */}
+      {/* 4. Dedicated Customer Portal (Rent & Buy, Tour Booking, Inquiries, Favorites) */}
+      {activePortal === 'customer' && (
+        <CustomerPortal
+          properties={properties}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onOpenDetails={setSelectedProperty}
+          currentUser={currentUser}
+          onNavigate={handleNavigate}
+          lang={lang}
+          t={t}
+          apiBase={API_BASE}
+        />
+      )}
+
+      {/* 5. Main Search & Property Browsing View */}
       {activePortal === 'search' && (
         <>
           <HeroSearch
