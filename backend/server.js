@@ -246,6 +246,36 @@ app.patch('/api/auth/users/:id/status', async (req, res) => {
   }
 });
 
+// PATCH /api/auth/users/:id/profile - Update User Profile
+app.patch('/api/auth/users/:id/profile', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, company, city, avatar } = req.body;
+
+    const updates = {};
+    if (name) updates.name = name;
+    if (phone !== undefined) updates.phone = phone;
+    if (company !== undefined) updates.company = company;
+    if (city) updates.city = city;
+    if (avatar) updates.avatar = avatar;
+
+    if (!isInMemoryFallback && mongoose.isValidObjectId(id)) {
+      const updated = await User.findByIdAndUpdate(id, updates, { new: true });
+      if (!updated) return res.status(404).json({ error: 'User not found' });
+      return res.json(updated);
+    }
+
+    const idx = inMemoryUsers.findIndex(u => u.id === id || u._id === id);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    inMemoryUsers[idx] = { ...inMemoryUsers[idx], ...updates };
+    return res.json(inMemoryUsers[idx]);
+  } catch (err) {
+    console.error('Error updating user profile:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 // ==========================================
 // PROPERTY ROUTES
 // ==========================================
