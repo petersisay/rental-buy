@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import RoleNavigation from './components/RoleNavigation';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
+import ProfilePage from './components/ProfilePage';
 import HeroSearch from './components/HeroSearch';
 import PropertyCard from './components/PropertyCard';
 import PropertyModal from './components/PropertyModal';
@@ -17,9 +18,6 @@ import { RefreshCw, AlertCircle } from 'lucide-react';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 export default function App() {
-  // Active Portal/Page State: 'landing', 'search', 'owners', 'agents', 'developers', 'admin', 'login'
-  const [activePortal, setActivePortal] = useState('landing');
-
   // Logged-in User State (Persisted in localStorage)
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -29,6 +27,10 @@ export default function App() {
       return null;
     }
   });
+
+  // Active Portal/Page State: default is 'landing' (First Landing Page view)
+  const [activePortal, setActivePortal] = useState('landing');
+  const [loginOptions, setLoginOptions] = useState({ role: 'seeker', mode: 'login' });
 
   // Language State: Amharic ('am') or English ('en')
   const [lang, setLang] = useState(() => {
@@ -53,6 +55,35 @@ export default function App() {
     });
   };
 
+  // Safe Navigation Handler that enforces login for role-protected pages
+  const handleNavigate = (portal, options = {}) => {
+    if (portal === 'login') {
+      setLoginOptions({
+        role: options.role || 'seeker',
+        mode: options.mode || 'login'
+      });
+      setActivePortal('login');
+      return;
+    }
+
+    // Role-protected pages require authentication
+    const protectedPortals = ['owners', 'agents', 'developers', 'admin', 'profile'];
+    if (!currentUser && protectedPortals.includes(portal)) {
+      // Map portal to requested role
+      let targetRole = 'seeker';
+      if (portal === 'owners') targetRole = 'owner';
+      if (portal === 'agents') targetRole = 'agent';
+      if (portal === 'developers') targetRole = 'developer';
+      if (portal === 'admin') targetRole = 'admin';
+
+      setLoginOptions({ role: targetRole, mode: 'login' });
+      setActivePortal('login');
+      return;
+    }
+
+    setActivePortal(portal);
+  };
+
   // Auth Handlers
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
@@ -62,7 +93,8 @@ export default function App() {
       console.error(e);
     }
 
-    // Role-based redirect to dedicated portal
+    // Role-based render after login:
+    // Render the user's role page immediately
     if (user.role === 'admin') {
       setActivePortal('admin');
     } else if (user.role === 'owner') {
@@ -73,6 +105,15 @@ export default function App() {
       setActivePortal('developers');
     } else {
       setActivePortal('search');
+    }
+  };
+
+  const handleUpdateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('kedami_user', JSON.stringify(updatedUser));
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -227,9 +268,9 @@ export default function App() {
   // Toggle favorite bookmark
   const toggleFavorite = (property) => {
     setFavorites((prev) => {
-      const exists = prev.some((p) => p.id === property.id);
+      const exists = prev.some((p) => p.id === property.id || p.id === property._id);
       if (exists) {
-        return prev.filter((p) => p.id !== property.id);
+        return prev.filter((p) => p.id !== property.id && p.id !== property._id);
       } else {
         return [...prev, property];
       }
@@ -237,7 +278,7 @@ export default function App() {
   };
 
   const removeFavorite = (propertyId) => {
-    setFavorites((prev) => prev.filter((p) => p.id !== propertyId));
+    setFavorites((prev) => prev.filter((p) => p.id !== propertyId && p._id !== propertyId));
   };
 
   const handleCityChange = (newCity) => {
@@ -273,45 +314,67 @@ export default function App() {
         t={t}
         currentUser={currentUser}
         onLogout={handleLogout}
-        onNavigate={setActivePortal}
+        onNavigate={handleNavigate}
       />
 
-      {/* Role Navigation Switcher */}
-      <RoleNavigation
-        activeTab={activePortal}
-        onSelectTab={setActivePortal}
-        pendingCount={pendingCount}
-        lang={lang}
-        t={t}
-      />
+      {/* Role Navigation Switcher:
+          ONLY RENDERED AFTER USER LOGS IN!
+          Completely hidden when visitor is on the Landing Page or guest! */}
+      {currentUser && (
+        <RoleNavigation
+          activeTab={activePortal}
+          onSelectTab={handleNavigate}
+          currentUser={currentUser}
+          pendingCount={pendingCount}
+          lang={lang}
+          t={t}
+        />
+      )}
 
       {/* ========================================================= */}
       {/* CONDITIONAL PORTAL VIEWS                                 */}
       {/* ========================================================= */}
 
-      {/* 1. Landing Page with Animated Hero */}
+      {/* 1. Landing Page (First View for Guests) */}
       {activePortal === 'landing' && (
         <LandingPage
           t={t}
           lang={lang}
-          onNavigate={setActivePortal}
+          onNavigate={handleNavigate}
           onSearchSubmit={handleQuickSearchSubmit}
           currentUser={currentUser}
         />
       )}
 
-      {/* 2. Login & Registration Page */}
+      {/* 2. Login & Sign Up Page */}
       {activePortal === 'login' && (
         <LoginPage
           t={t}
           lang={lang}
           onLoginSuccess={handleLoginSuccess}
-          onNavigate={setActivePortal}
+          onNavigate={handleNavigate}
           currentUser={currentUser}
+          initialRole={loginOptions.role}
+          initialMode={loginOptions.mode}
         />
       )}
 
-      {/* 3. Main Search & Property Browsing View */}
+      {/* 3. User Profile Page */}
+      {activePortal === 'profile' && currentUser && (
+        <ProfilePage
+          currentUser={currentUser}
+          onUpdateUser={handleUpdateUser}
+          onLogout={handleLogout}
+          onNavigate={handleNavigate}
+          properties={properties}
+          favorites={favorites}
+          lang={lang}
+          t={t}
+          apiBase={API_BASE}
+        />
+      )}
+
+      {/* 4. Main Search & Property Browsing View */}
       {activePortal === 'search' && (
         <>
           <HeroSearch
@@ -422,7 +485,7 @@ export default function App() {
         </>
       )}
 
-      {/* 4. Property Owners Portal View */}
+      {/* 5. Property Owners Portal View */}
       {activePortal === 'owners' && (
         <OwnerPortal
           properties={properties}
@@ -434,7 +497,7 @@ export default function App() {
         />
       )}
 
-      {/* 5. Agents & Brokers Portal View */}
+      {/* 6. Agents & Brokers Portal View */}
       {activePortal === 'agents' && (
         <AgentPortal
           properties={properties}
@@ -447,7 +510,7 @@ export default function App() {
         />
       )}
 
-      {/* 6. Builders & Developers Portal View */}
+      {/* 7. Builders & Developers Portal View */}
       {activePortal === 'developers' && (
         <DeveloperPortal
           lang={lang}
@@ -457,7 +520,7 @@ export default function App() {
         />
       )}
 
-      {/* 7. Platform Administrators Portal View */}
+      {/* 8. Platform Administrators Portal View */}
       {activePortal === 'admin' && (
         <AdminPortal
           properties={properties}
