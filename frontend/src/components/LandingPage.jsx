@@ -139,6 +139,14 @@ export default function LandingPage({
               <>
                 <button
                   type="button"
+                  onClick={() => onNavigate('login', { role: 'customer', mode: 'login' })}
+                  className="bg-teal-500 hover:bg-teal-400 text-gray-950 font-black px-8 py-3.5 rounded-2xl shadow-xl hover:shadow-2xl transition-all flex items-center gap-2 transform hover:-translate-y-0.5"
+                >
+                  <Key className="w-5 h-5 text-gray-950" />
+                  <span>{isAmharic ? 'እንደ ደንበኛ ግባ (Rent & Buy)' : 'Customer Sign-In (Rent & Buy)'}</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => onNavigate('login', { mode: 'login' })}
                   className="bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-black px-8 py-3.5 rounded-2xl shadow-xl hover:shadow-2xl transition-all flex items-center gap-2 transform hover:-translate-y-0.5"
                 >
@@ -292,7 +300,35 @@ export default function LandingPage({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {/* Role 0: Customers / Renters & Buyers */}
+            <div className="bg-gradient-to-b from-teal-50/50 to-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all border-2 border-teal-200 flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 text-[10px] font-black uppercase tracking-wider">
+                {isAmharic ? 'ቀጥታ በ Google' : 'Google Direct'}
+              </div>
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md shadow-teal-600/20">
+                  <Key className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-extrabold text-gray-900 mb-2">
+                  {isAmharic ? 'ደንበኞች (ኪራይና ግዢ)' : 'Customers (Rent & Buy)'}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 mb-4 leading-relaxed">
+                  {isAmharic
+                    ? 'በቀጥታ በ Google አካውንት ይግቡ፤ በአዲስ አበባና በአዳማ ቤቶችን ይከራዩ ወይም ይግዙ። ጉብኝት ያስይዙ እና ጥያቄዎን በቀጥታ ያስተላልፉ።'
+                    : 'Sign in directly with Google to rent, buy, schedule tours, and connect with landlords. Zero admin verification wait time.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRoleCardClick('customer', 'customer')}
+                className="inline-flex items-center justify-between text-xs font-bold text-teal-700 hover:text-teal-800 pt-3 border-t border-teal-100 w-full"
+              >
+                <span>{currentUser ? (isAmharic ? 'ወደ ደንበኛ ፖርታል ሂድ' : 'Open Customer Portal') : (isAmharic ? 'በ Google በቀጥታ ግባ' : 'Sign In with Google')}</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
             {/* Role 1: Property Owners */}
             <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all border border-gray-200 flex flex-col justify-between group">
               <div>
