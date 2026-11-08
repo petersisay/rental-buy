@@ -663,11 +663,23 @@ export const seedUsers = [
     createdAt: new Date("2026-01-10T10:00:00Z")
   },
   {
+    id: "usr-customer-1",
+    _id: "usr-customer-1",
+    name: "Hirut Tadesse (ደንበኛ / ተከራይ እና ገዥ)",
+    email: "customer.demo@kedami.et",
+    role: "customer",
+    status: "approved",
+    phone: "+251 922 778899",
+    city: "Addis Ababa",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80",
+    createdAt: new Date("2026-03-20T14:15:00Z")
+  },
+  {
     id: "usr-seeker-1",
     _id: "usr-seeker-1",
     name: "Hirut Tadesse (ተከራይ/ገዢ)",
     email: "seeker.demo@kedami.et",
-    role: "seeker",
+    role: "customer",
     status: "approved",
     phone: "+251 922 778899",
     city: "Addis Ababa",
