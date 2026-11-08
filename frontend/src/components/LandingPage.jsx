@@ -70,7 +70,7 @@ export default function LandingPage({
             key={idx}
             className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out transform scale-105 ${
               idx === activeImageIndex 
-                ? 'opacity-65 scale-100' 
+                ? 'opacity-70 scale-100' 
                 : 'opacity-0 pointer-events-none'
             }`}
             style={{
