@@ -269,14 +269,15 @@ app.patch('/api/auth/users/:id/profile', async (req, res) => {
     if (!isInMemoryFallback && mongoose.isValidObjectId(id)) {
       const updated = await User.findByIdAndUpdate(id, updates, { new: true });
       if (!updated) return res.status(404).json({ error: 'User not found' });
-      return res.json(updated);
+      const userObj = updated.toJSON();
+      return res.json({ status: 'success', user: updated, ...userObj });
     }
 
     const idx = inMemoryUsers.findIndex(u => u.id === id || u._id === id);
     if (idx === -1) return res.status(404).json({ error: 'User not found' });
 
     inMemoryUsers[idx] = { ...inMemoryUsers[idx], ...updates };
-    return res.json(inMemoryUsers[idx]);
+    return res.json({ status: 'success', user: inMemoryUsers[idx], ...inMemoryUsers[idx] });
   } catch (err) {
     console.error('Error updating user profile:', err);
     res.status(500).json({ error: 'Failed to update profile' });
@@ -659,6 +660,7 @@ app.get('/api/stats', async (req, res) => {
 
       return res.json({
         total,
+        totalProperties: total,
         approved,
         pending,
         rejected,
@@ -685,6 +687,7 @@ app.get('/api/stats', async (req, res) => {
 
     return res.json({
       total,
+      totalProperties: total,
       approved,
       pending,
       rejected,
@@ -699,6 +702,17 @@ app.get('/api/stats', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Failed to retrieve platform stats' });
   }
+});
+
+// Admin aliases for backward & microservice compatibility
+app.get('/api/admin/stats', (req, res, next) => {
+  req.url = '/api/stats';
+  app.handle(req, res, next);
+});
+
+app.get('/api/admin/users', (req, res, next) => {
+  req.url = '/api/auth/users';
+  app.handle(req, res, next);
 });
 
 app.listen(PORT, () => {
