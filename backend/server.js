@@ -102,9 +102,10 @@ app.post('/api/auth/login', async (req, res) => {
       }
 
       // Determine initial approval status:
-      // Pre-approved admin or demo domains get 'approved', new self-registered owners/agents get 'pending'
-      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et');
+      // Pre-approved admin, demo domains and regular seekers get 'approved'
+      // New self-registered owners, agents and developers get 'pending' (requires Admin Approval)
       const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'seeker');
+      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et') || assignedRole === 'seeker';
 
       user = new User({
         name: name || normalizedEmail.split('@')[0],
@@ -127,8 +128,8 @@ app.post('/api/auth/login', async (req, res) => {
         return res.json({ user, isNew: false });
       }
 
-      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et');
       const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'seeker');
+      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et') || assignedRole === 'seeker';
       const newId = `usr-${Date.now()}`;
 
       user = {
