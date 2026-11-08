@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Building2, Home, Key, ShieldCheck, Mail, User, 
   Phone, ArrowRight, CheckCircle2, Clock, AlertCircle, 
-  Sparkles, Lock, ArrowLeft
+  Sparkles, Lock, ArrowLeft, MapPin, Building
 } from 'lucide-react';
 
 const DEMO_USERS = [
@@ -63,13 +63,19 @@ export default function LoginPage({
   lang, 
   onLoginSuccess, 
   onNavigate, 
-  currentUser 
+  currentUser,
+  initialRole = 'seeker',
+  initialMode = 'login'
 }) {
+  const isAmharic = lang === 'am';
+
+  const [authMode, setAuthMode] = useState(initialMode); // 'login' | 'register'
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('seeker');
+  const [role, setRole] = useState(initialRole);
   const [company, setCompany] = useState('');
+  const [city, setCity] = useState('Addis Ababa');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
@@ -106,9 +112,8 @@ export default function LoginPage({
     setError('');
     setPendingUserNotice(null);
 
-    // Prompt for Google account email or use a simulated Google user
     const googleEmail = prompt(
-      lang === 'am' 
+      isAmharic 
         ? 'የGoogle አካውንት ኢሜይልዎን ያስገቡ:' 
         : 'Enter your Google Account email address:',
       'user@gmail.com'
@@ -129,7 +134,7 @@ export default function LoginPage({
           name: gName.charAt(0).toUpperCase() + gName.slice(1),
           googleId: `google-${Date.now()}`,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=4285F4&color=fff`,
-          role: 'seeker'
+          role: authMode === 'register' ? role : 'seeker'
         })
       });
 
@@ -148,11 +153,11 @@ export default function LoginPage({
     }
   };
 
-  // Email / Role Registration & Sign-In
-  const handleEmailSubmit = async (e) => {
+  // Email Submit for Login or Registration
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
-      setError(lang === 'am' ? 'እባክዎ ኢሜይልዎን ያስገቡ' : 'Please provide your email');
+      setError(isAmharic ? 'እባክዎ ኢሜይልዎን ያስገቡ' : 'Please provide your email');
       return;
     }
 
@@ -168,8 +173,9 @@ export default function LoginPage({
           email,
           name: name || email.split('@')[0],
           phone,
-          role,
-          company
+          role: authMode === 'register' ? role : undefined,
+          company,
+          city
         })
       });
 
@@ -198,7 +204,7 @@ export default function LoginPage({
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-6 font-medium"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{lang === 'am' ? 'ወደ መነሻ ገጽ ተመለስ' : 'Back to Home'}</span>
+          <span>{isAmharic ? 'ወደ መነሻ ገጽ ተመለስ' : 'Back to Home'}</span>
         </button>
 
         {/* Heading */}
@@ -222,7 +228,7 @@ export default function LoginPage({
           </div>
         )}
 
-        {/* Pending Approval Modal/Card */}
+        {/* Pending Approval Notice */}
         {pendingUserNotice && (
           <div className="mb-8 p-6 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-sm animate-fade-in">
             <div className="flex items-start gap-4">
@@ -249,10 +255,36 @@ export default function LoginPage({
           </div>
         )}
 
-        {/* Main Grid: Left Login Options, Right 1-Click Demo Accounts */}
+        {/* Main Grid: Left Auth Form, Right 1-Click Demo Accounts */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Google & Email Authentication */}
-          <div className="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+          {/* Left Column: Form */}
+          <div className="lg:col-span-7 bg-white rounded-3xl shadow-sm border border-gray-200 p-6 sm:p-8">
+            {/* Mode Switcher Tabs (Log In vs Sign Up) */}
+            <div className="flex border-b border-gray-200 mb-6 gap-2">
+              <button
+                type="button"
+                onClick={() => { setAuthMode('login'); setError(''); }}
+                className={`flex-1 pb-3 font-bold text-sm text-center border-b-2 transition-colors ${
+                  authMode === 'login'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                }`}
+              >
+                {t.authTabLogin || 'Log In'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode('register'); setError(''); }}
+                className={`flex-1 pb-3 font-bold text-sm text-center border-b-2 transition-colors ${
+                  authMode === 'register'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-gray-500 hover:text-gray-900'
+                }`}
+              >
+                {t.authTabRegister || 'Sign Up / Register'}
+              </button>
+            </div>
+
             {/* Google Sign-In Button */}
             <button
               type="button"
@@ -278,7 +310,7 @@ export default function LoginPage({
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{googleLoading ? (lang === 'am' ? 'በመግባት ላይ...' : 'Connecting...') : t.authGoogleBtn}</span>
+              <span>{googleLoading ? (isAmharic ? 'በመግባት ላይ...' : 'Connecting...') : t.authGoogleBtn}</span>
             </button>
 
             {/* Divider */}
@@ -293,103 +325,130 @@ export default function LoginPage({
               </div>
             </div>
 
-            {/* Email / Role Form */}
-            <form onSubmit={handleEmailSubmit} className="space-y-4">
+            {/* Email Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                   {t.authEmailLabel} *
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+                  <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
                   <input
                     type="email"
                     required
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  {t.authNameLabel}
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
-                  <input
-                    type="text"
-                    placeholder={lang === 'am' ? 'ሙሉ ስምዎን ያስገቡ' : 'Your full name'}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    {t.authPhoneLabel}
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
-                    <input
-                      type="tel"
-                      placeholder="+251 911 ..."
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
-                    />
+              {/* Register-only Fields */}
+              {authMode === 'register' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      {t.authNameLabel} *
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="text"
+                        required
+                        placeholder={isAmharic ? 'ሙሉ ስምዎን ያስገቡ' : 'Your full name'}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    {t.authRoleLabel}
-                  </label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full py-2.5 px-3 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="seeker">{t.authRoleSeeker}</option>
-                    <option value="owner">{t.authRoleOwner}</option>
-                    <option value="agent">{t.authRoleAgent}</option>
-                    <option value="developer">{t.authRoleDeveloper}</option>
-                  </select>
-                </div>
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        {t.authRoleLabel} *
+                      </label>
+                      <select
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        className="w-full py-2.5 px-3 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500 font-medium"
+                      >
+                        <option value="owner">{t.authRoleOwner}</option>
+                        <option value="agent">{t.authRoleAgent}</option>
+                        <option value="developer">{t.authRoleDeveloper}</option>
+                        <option value="seeker">{t.authRoleSeeker}</option>
+                      </select>
+                    </div>
 
-              {(role === 'agent' || role === 'developer') && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    {t.authCompanyLabel}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={lang === 'am' ? 'የድርጅት ወይም የኤጀንሲ ስም' : 'Agency or firm name'}
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    className="w-full py-2.5 px-4 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        {t.authCityLabel || 'City'} *
+                      </label>
+                      <select
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="w-full py-2.5 px-3 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500 font-medium"
+                      >
+                        <option value="Addis Ababa">{t.addisAbaba}</option>
+                        <option value="Adama">{t.adama}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                      {t.authPhoneLabel}
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                      <input
+                        type="tel"
+                        placeholder="+251 911 ..."
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  {(role === 'agent' || role === 'developer') && (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        {t.authCompanyLabel}
+                      </label>
+                      <div className="relative">
+                        <Building className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
+                        <input
+                          type="text"
+                          placeholder={isAmharic ? 'የድርጅት ወይም የኤጀንሲ ስም' : 'Agency or firm name'}
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
               >
-                <span>{loading ? (lang === 'am' ? 'በማረጋገጥ ላይ...' : 'Verifying...') : t.authSubmitLogin}</span>
+                <span>
+                  {loading 
+                    ? (isAmharic ? 'በማረጋገጥ ላይ...' : 'Verifying...') 
+                    : (authMode === 'register' ? t.authSubmitRegister : t.authSubmitLogin)}
+                </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           </div>
 
           {/* Right Column: 1-Click Demo Profiles */}
-          <div className="lg:col-span-5 bg-gradient-to-b from-gray-900 to-gray-950 rounded-2xl p-6 sm:p-7 text-white border border-gray-800 shadow-xl flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-gradient-to-b from-gray-900 to-gray-950 rounded-3xl p-6 sm:p-7 text-white border border-gray-800 shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
                 <Sparkles className="w-4 h-4" />
@@ -406,18 +465,18 @@ export default function LoginPage({
                     type="button"
                     onClick={() => handleDemoLogin(demo.role)}
                     disabled={loading}
-                    className="w-full text-left p-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/25 transition-all flex items-center justify-between group"
+                    className="w-full text-left p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/25 transition-all flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <img
                         src={demo.avatar}
                         alt={demo.name}
-                        className="w-10 h-10 rounded-full object-cover border border-white/20"
+                        className="w-10 h-10 rounded-xl object-cover border border-white/20"
                       />
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-                            {lang === 'am' ? demo.title_am : demo.title}
+                            {isAmharic ? demo.title_am : demo.title}
                           </span>
                           <span className="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                             Approved
