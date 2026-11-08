@@ -59,7 +59,6 @@ userSchema.set('toJSON', {
 });
 
 // Production Database Performance Indexes for User Authentication & Admin Queue
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1, status: 1 });
 userSchema.index({ createdAt: -1 });
 
