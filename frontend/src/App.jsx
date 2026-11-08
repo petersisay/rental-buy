@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import RoleNavigation from './components/RoleNavigation';
+import LandingPage from './components/LandingPage';
+import LoginPage from './components/LoginPage';
 import HeroSearch from './components/HeroSearch';
 import PropertyCard from './components/PropertyCard';
 import PropertyModal from './components/PropertyModal';
@@ -12,11 +14,21 @@ import AdminPortal from './components/AdminPortal';
 import { translations } from './locales/translations';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 export default function App() {
-  // Active Portal/Page State: 'search', 'owners', 'agents', 'developers', 'admin'
-  const [activePortal, setActivePortal] = useState('search');
+  // Active Portal/Page State: 'landing', 'search', 'owners', 'agents', 'developers', 'admin', 'login'
+  const [activePortal, setActivePortal] = useState('landing');
+
+  // Logged-in User State (Persisted in localStorage)
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kedami_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
   // Language State: Amharic ('am') or English ('en')
   const [lang, setLang] = useState(() => {
@@ -41,6 +53,39 @@ export default function App() {
     });
   };
 
+  // Auth Handlers
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('kedami_user', JSON.stringify(user));
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Role-based redirect to dedicated portal
+    if (user.role === 'admin') {
+      setActivePortal('admin');
+    } else if (user.role === 'owner') {
+      setActivePortal('owners');
+    } else if (user.role === 'agent') {
+      setActivePortal('agents');
+    } else if (user.role === 'developer') {
+      setActivePortal('developers');
+    } else {
+      setActivePortal('search');
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem('kedami_user');
+    } catch (e) {
+      console.error(e);
+    }
+    setActivePortal('landing');
+  };
+
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,9 +105,11 @@ export default function App() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [initialContactMode, setInitialContactMode] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
+
+  // Favorites (Bookmarks) State
   const [favorites, setFavorites] = useState(() => {
     try {
-      const saved = localStorage.getItem('kedami_shortlisted');
+      const saved = localStorage.getItem('kedami_favorites');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -72,139 +119,160 @@ export default function App() {
   // Save favorites to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('kedami_shortlisted', JSON.stringify(favorites));
+      localStorage.setItem('kedami_favorites', JSON.stringify(favorites));
     } catch (e) {
       console.error('Failed to save favorites to localStorage', e);
     }
   }, [favorites]);
 
-  const toggleFavorite = (property) => {
-    setFavorites((prev) => {
-      const exists = prev.some((p) => (p.id || p._id) === (property.id || property._id));
-      if (exists) {
-        return prev.filter((p) => (p.id || p._id) !== (property.id || property._id));
-      } else {
-        return [...prev, property];
-      }
-    });
-  };
-
-  const removeFavorite = (id) => {
-    setFavorites((prev) => prev.filter((p) => (p.id || p._id) !== id));
-  };
-
-  // Fetch properties from Express MERN backend
+  // Fetch properties from Express MERN API
   const fetchProperties = useCallback(async () => {
     setLoading(true);
     setError(null);
-
-    const queryParams = new URLSearchParams();
-    if (filters.city) queryParams.append('city', filters.city);
-    if (filters.purpose) queryParams.append('purpose', filters.purpose);
-    if (filters.property_type) queryParams.append('property_type', filters.property_type);
-    if (filters.min_price !== null && filters.min_price !== undefined) queryParams.append('min_price', filters.min_price);
-    if (filters.max_price !== null && filters.max_price !== undefined) queryParams.append('max_price', filters.max_price);
-    if (filters.bhk !== null && filters.bhk !== undefined) queryParams.append('bhk', filters.bhk);
-    if (filters.search) queryParams.append('search', filters.search);
-
-    // If on admin or specific portal, fetch all statuses so review queues work
-    if (activePortal === 'admin' || activePortal === 'owners' || activePortal === 'agents') {
-      queryParams.append('status', 'all');
-    }
-
     try {
-      const res = await fetch(`${API_BASE}/api/properties?${queryParams.toString()}`);
+      const params = new URLSearchParams();
+
+      if (filters.city) params.append('city', filters.city);
+      if (filters.purpose) params.append('purpose', filters.purpose);
+      if (filters.property_type) params.append('property_type', filters.property_type);
+      if (filters.min_price) params.append('min_price', filters.min_price);
+      if (filters.max_price) params.append('max_price', filters.max_price);
+      if (filters.bhk) params.append('bhk', filters.bhk);
+      if (filters.search) params.append('search', filters.search);
+
+      // When viewing Admin Portal, request all properties including pending/rejected
+      if (activePortal === 'admin') {
+        params.append('status', 'all');
+      }
+
+      const res = await fetch(`${API_BASE}/api/properties?${params.toString()}`);
       if (!res.ok) {
-        throw new Error(`Failed to fetch properties (${res.status} ${res.statusText})`);
+        throw new Error(`Server returned HTTP ${res.status}`);
       }
       const data = await res.json();
       setProperties(data);
     } catch (err) {
-      setError(err.message || 'Unable to connect to the backend server.');
+      console.error('Error fetching properties:', err);
+      setError(
+        lang === 'am'
+          ? 'የቤቶች መረጃን ከመረጃ ቋት (Backend) ማምጣት አልተቻለም። እባክዎ ሰርቨሩ በፖርት 8000 እየሰራ መሆኑን ያረጋግጡ።'
+          : 'Unable to connect to the backend server. Please make sure the Express API is running on port 8000.'
+      );
     } finally {
       setLoading(false);
     }
-  }, [filters, activePortal]);
+  }, [filters, activePortal, lang]);
 
-  // Initial fetch and fetch when filters or portal changes
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
 
-  const updateFilters = (newFilters) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      purpose: 'buy',
-      city: '',
-      property_type: '',
-      min_price: null,
-      max_price: null,
-      bhk: null,
-      search: ''
-    });
-  };
-
-  // Handlers for Add, Update Status, Delete
+  // Handler: Add property
   const handleAddProperty = async (propertyData) => {
     const res = await fetch(`${API_BASE}/api/properties`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(propertyData)
     });
-    if (!res.ok) throw new Error('Failed to create property listing.');
-    await fetchProperties();
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || 'Failed to submit property');
+    }
+
+    // Refresh property list
+    fetchProperties();
   };
 
-  const handleUpdateStatus = async (id, status) => {
-    const res = await fetch(`${API_BASE}/api/properties/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status })
+  // Handler: Update property verification status (Approve / Reject)
+  const handleUpdateStatus = async (propertyId, newStatus) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/properties/${propertyId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update status');
+      }
+
+      fetchProperties();
+    } catch (err) {
+      alert(err.message || 'Error updating status');
+    }
+  };
+
+  // Handler: Delete property
+  const handleDeleteProperty = async (propertyId) => {
+    if (!window.confirm(lang === 'am' ? 'ይህን ቤት መሰረዝ ይፈልጋሉ?' : 'Are you sure you want to delete this property?')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/properties/${propertyId}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete property');
+      }
+
+      fetchProperties();
+    } catch (err) {
+      alert(err.message || 'Error deleting property');
+    }
+  };
+
+  // Toggle favorite bookmark
+  const toggleFavorite = (property) => {
+    setFavorites((prev) => {
+      const exists = prev.some((p) => p.id === property.id);
+      if (exists) {
+        return prev.filter((p) => p.id !== property.id);
+      } else {
+        return [...prev, property];
+      }
     });
-    if (!res.ok) throw new Error('Failed to update property status.');
-    await fetchProperties();
   };
 
-  const handleDeleteProperty = async (id) => {
-    const confirmMsg = lang === 'am' ? 'እርግጠኛ ነዎት ይህንን ንብረት መሰረዝ ይፈልጋሉ?' : 'Are you sure you want to delete this property?';
-    if (!window.confirm(confirmMsg)) return;
-
-    const res = await fetch(`${API_BASE}/api/properties/${id}`, {
-      method: 'DELETE'
-    });
-    if (!res.ok) throw new Error('Failed to delete property.');
-    await fetchProperties();
+  const removeFavorite = (propertyId) => {
+    setFavorites((prev) => prev.filter((p) => p.id !== propertyId));
   };
 
-  const getCityDisplayName = (cityName) => {
-    if (!cityName) return t.allCities;
-    if (cityName === 'Addis Ababa') return t.addisAbaba;
-    if (cityName === 'Adama') return t.adama;
-    return cityName;
+  const handleCityChange = (newCity) => {
+    setFilters((prev) => ({ ...prev, city: newCity }));
   };
 
-  const pendingCount = properties.filter(p => p.status === 'pending').length;
+  const handleQuickSearchSubmit = (quickParams) => {
+    setFilters((prev) => ({
+      ...prev,
+      city: quickParams.city !== undefined ? quickParams.city : prev.city,
+      purpose: quickParams.purpose !== undefined ? quickParams.purpose : prev.purpose,
+      property_type: quickParams.property_type !== undefined ? quickParams.property_type : prev.property_type,
+      search: quickParams.search !== undefined ? quickParams.search : prev.search
+    }));
+  };
+
+  const pendingCount = properties.filter((p) => p.status === 'pending').length;
 
   return (
-    <div className="app">
-      {/* Top Navbar */}
+    <div className="app-container min-h-screen flex flex-col bg-gray-50 text-gray-900">
+      {/* Primary Navigation Bar */}
       <Navbar
         city={filters.city}
-        onCityChange={(city) => {
-          updateFilters({ city });
-          if (activePortal !== 'search') setActivePortal('search');
-        }}
+        onCityChange={handleCityChange}
         favoritesCount={favorites.length}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
         lang={lang}
         onToggleLang={toggleLanguage}
         t={t}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onNavigate={setActivePortal}
       />
 
-      {/* Role Navigation Bar (Portals for Search, Owners, Agents, Developers, Admins) */}
+      {/* Role Navigation Switcher */}
       <RoleNavigation
         activeTab={activePortal}
         onSelectTab={setActivePortal}
@@ -213,141 +281,143 @@ export default function App() {
         t={t}
       />
 
-      {/* Main Content Router based on Active Role Portal */}
+      {/* ========================================================= */}
+      {/* CONDITIONAL PORTAL VIEWS                                 */}
+      {/* ========================================================= */}
+
+      {/* 1. Landing Page with Animated Hero */}
+      {activePortal === 'landing' && (
+        <LandingPage
+          t={t}
+          lang={lang}
+          onNavigate={setActivePortal}
+          onSearchSubmit={handleQuickSearchSubmit}
+          currentUser={currentUser}
+        />
+      )}
+
+      {/* 2. Login & Registration Page */}
+      {activePortal === 'login' && (
+        <LoginPage
+          t={t}
+          lang={lang}
+          onLoginSuccess={handleLoginSuccess}
+          onNavigate={setActivePortal}
+          currentUser={currentUser}
+        />
+      )}
+
+      {/* 3. Main Search & Property Browsing View */}
       {activePortal === 'search' && (
         <>
           <HeroSearch
             filters={filters}
-            onFilterChange={updateFilters}
-            onSearch={fetchProperties}
-            onReset={resetFilters}
+            onFilterChange={setFilters}
+            totalResults={properties.length}
             lang={lang}
             t={t}
           />
 
-          <main className="main-container">
-            {/* Results Header */}
-            <div className="results-header">
+          <main className="main-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
+            <div className="results-header flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-gray-200 gap-2">
               <div>
-                <h2 className="results-count">
-                  <span>{properties.filter(p => p.status === 'approved').length}</span> {filters.purpose === 'rent' ? t.resultsCountSuffixRent : t.resultsCountSuffixBuy} ({getCityDisplayName(filters.city)})
+                <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">
+                  {properties.length}{' '}
+                  {filters.purpose === 'buy' ? t.resultsCountSuffixBuy : t.resultsCountSuffixRent}
                 </h2>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+                <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                   {t.resultsSubtitle}
                 </p>
               </div>
 
-              <div className="filter-tags">
-                {filters.city && (
-                  <span className="filter-tag">
-                    {t.labelCity}: {getCityDisplayName(filters.city)}
-                    <button onClick={() => updateFilters({ city: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-                  </span>
-                )}
-                {filters.property_type && (
-                  <span className="filter-tag">
-                    {t.labelType}: {filters.property_type === 'flat' ? t.typeFlat : t.typeHouse}
-                    <button onClick={() => updateFilters({ property_type: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-                  </span>
-                )}
-                {filters.bhk && (
-                  <span className="filter-tag">
-                    {filters.bhk} {t.bedsCount}
-                    <button onClick={() => updateFilters({ bhk: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-                  </span>
-                )}
-                {(filters.min_price || filters.max_price) && (
-                  <span className="filter-tag">
-                    {t.labelBudget}
-                    <button onClick={() => updateFilters({ min_price: null, max_price: null })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-                  </span>
-                )}
-                {filters.search && (
-                  <span className="filter-tag">
-                    "{filters.search}"
-                    <button onClick={() => updateFilters({ search: '' })} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
-                  </span>
-                )}
-
-                {(filters.city || filters.property_type || filters.bhk || filters.min_price || filters.max_price || filters.search) && (
-                  <button className="btn-clear-filters" onClick={resetFilters}>
-                    {t.clearAllFilters}
-                  </button>
-                )}
-              </div>
+              {(filters.city || filters.property_type || filters.bhk || filters.min_price || filters.max_price || filters.search) && (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-colors w-fit"
+                  onClick={() =>
+                    setFilters({
+                      purpose: filters.purpose,
+                      city: '',
+                      property_type: '',
+                      min_price: null,
+                      max_price: null,
+                      bhk: null,
+                      search: ''
+                    })
+                  }
+                >
+                  <RefreshCw size={13} />
+                  <span>{t.clearAllFilters}</span>
+                </button>
+              )}
             </div>
 
-            {/* Loading State */}
-            {loading && (
-              <div style={{ textAlign: 'center', padding: '5rem 0' }}>
-                <RefreshCw size={36} color="var(--primary)" style={{ animation: 'spin 1s linear infinite' }} />
-                <p style={{ marginTop: '1rem', color: '#64748b', fontWeight: 600 }}>
-                  {t.searching}
-                </p>
+            {loading ? (
+              <div className="text-center py-20 text-gray-500 flex flex-col items-center">
+                <RefreshCw size={36} className="animate-spin text-emerald-600 mb-3" />
+                <p className="font-semibold text-sm">{t.searching}</p>
               </div>
-            )}
-
-            {/* Error State */}
-            {!loading && error && (
-              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', padding: '2rem', borderRadius: '12px', textAlign: 'center', maxWidth: '600px', margin: '2rem auto' }}>
-                <AlertCircle size={40} color="#dc2626" style={{ margin: '0 auto 0.75rem' }} />
-                <h3 style={{ color: '#991b1b', fontWeight: 700 }}>Connection Notice</h3>
-                <p style={{ color: '#7f1d1d', marginTop: '0.4rem', fontSize: '0.9rem' }}>{error}</p>
+            ) : error ? (
+              <div className="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-center max-w-lg mx-auto">
+                <AlertCircle size={36} className="mx-auto mb-2 text-rose-600" />
+                <p className="font-bold text-sm">{error}</p>
                 <button
+                  type="button"
+                  className="mt-4 px-4 py-2 bg-rose-600 text-white rounded-lg text-xs font-bold shadow-sm"
                   onClick={fetchProperties}
-                  style={{ marginTop: '1rem', background: 'var(--primary)', color: 'white', border: 'none', padding: '0.55rem 1.25rem', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}
                 >
-                  Retry Search
+                  Retry Connection
                 </button>
               </div>
-            )}
-
-            {/* Properties Grid */}
-            {!loading && !error && properties.length > 0 && (
-              <div className="properties-grid">
-                {properties
-                  .filter(prop => prop.status === 'approved')
-                  .map((prop) => (
-                    <PropertyCard
-                      key={prop.id || prop._id}
-                      property={prop}
-                      isFavorite={favorites.some((f) => (f.id || f._id) === (prop.id || prop._id))}
-                      onToggleFavorite={toggleFavorite}
-                      onSelect={(p) => {
-                        setSelectedProperty(p);
-                        setInitialContactMode(false);
-                      }}
-                      onContact={(p) => {
-                        setSelectedProperty(p);
-                        setInitialContactMode(true);
-                      }}
-                      lang={lang}
-                      t={t}
-                    />
-                  ))}
-              </div>
-            )}
-
-            {/* Empty State */}
-            {!loading && !error && properties.filter(p => p.status === 'approved').length === 0 && (
-              <div className="empty-state">
-                <div className="empty-state-icon">🏠</div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>
-                  {t.noPropertiesFound}
-                </h3>
-                <p style={{ color: '#64748b', maxWidth: '480px', margin: '0.5rem auto 1.5rem', fontSize: '0.95rem' }}>
-                  {t.noPropertiesDesc}
-                </p>
-                <button className="btn-search-main" style={{ maxWidth: '240px', margin: '0 auto' }} onClick={resetFilters}>
+            ) : properties.length === 0 ? (
+              <div className="text-center py-16 px-4 bg-white rounded-2xl border border-gray-200 shadow-sm max-w-lg mx-auto">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{t.noPropertiesFound}</h3>
+                <p className="text-xs sm:text-sm text-gray-500 mb-6">{t.noPropertiesDesc}</p>
+                <button
+                  type="button"
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                  onClick={() =>
+                    setFilters({
+                      purpose: 'buy',
+                      city: '',
+                      property_type: '',
+                      min_price: null,
+                      max_price: null,
+                      bhk: null,
+                      search: ''
+                    })
+                  }
+                >
                   {t.btnResetFilters}
                 </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {properties.map((prop) => (
+                  <PropertyCard
+                    key={prop.id || prop._id}
+                    property={prop}
+                    isFavorite={favorites.some((f) => f.id === prop.id || f.id === prop._id)}
+                    onToggleFavorite={toggleFavorite}
+                    onSelect={(p) => {
+                      setSelectedProperty(p);
+                      setInitialContactMode(false);
+                    }}
+                    onContact={(p) => {
+                      setSelectedProperty(p);
+                      setInitialContactMode(true);
+                    }}
+                    lang={lang}
+                    t={t}
+                  />
+                ))}
               </div>
             )}
           </main>
         </>
       )}
 
-      {/* Property Owners Portal View */}
+      {/* 4. Property Owners Portal View */}
       {activePortal === 'owners' && (
         <OwnerPortal
           properties={properties}
@@ -355,11 +425,11 @@ export default function App() {
           onDeleteProperty={handleDeleteProperty}
           lang={lang}
           t={t}
-          apiBase={API_BASE}
+          currentUser={currentUser}
         />
       )}
 
-      {/* Agents & Brokers Portal View */}
+      {/* 5. Agents & Brokers Portal View */}
       {activePortal === 'agents' && (
         <AgentPortal
           properties={properties}
@@ -368,19 +438,21 @@ export default function App() {
           lang={lang}
           t={t}
           apiBase={API_BASE}
+          currentUser={currentUser}
         />
       )}
 
-      {/* Builders & Developers Portal View */}
+      {/* 6. Builders & Developers Portal View */}
       {activePortal === 'developers' && (
         <DeveloperPortal
           lang={lang}
           t={t}
           apiBase={API_BASE}
+          currentUser={currentUser}
         />
       )}
 
-      {/* Platform Administrators Portal View */}
+      {/* 7. Platform Administrators Portal View */}
       {activePortal === 'admin' && (
         <AdminPortal
           properties={properties}
@@ -414,48 +486,54 @@ export default function App() {
         t={t}
       />
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              <div className="logo-badge">ቀዳሚ</div>
-              <h3 style={{ margin: 0 }}>{lang === 'am' ? 'ቀዳሚ' : 'kedami'}</h3>
+      {/* Responsive Footer */}
+      <footer className="footer bg-gray-950 text-gray-400 mt-auto border-t border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm">
+                  ቀ
+                </div>
+                <h3 className="text-white font-extrabold text-lg m-0">
+                  {lang === 'am' ? 'ቀዳሚ' : 'kedami'}
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-md">
+                {t.footerAbout}
+              </p>
             </div>
-            <p style={{ fontSize: '0.88rem', lineHeight: '1.6' }}>
-              {t.footerAbout}
-            </p>
+
+            <div>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-3">
+                {t.footerAddisTitle}
+              </h4>
+              <ul className="space-y-2 text-xs">
+                <li>{lang === 'am' ? 'በቦሌ የሚሸጡ አፓርታማዎች' : 'Flats for Sale in Bole'}</li>
+                <li>{lang === 'am' ? 'በካዛንቺስ የሚከራዩ ቤቶች' : 'Apartments for Rent in Kazanchis'}</li>
+                <li>{lang === 'am' ? 'በሲኤምሲ የሚሸጡ ቪላዎች' : 'Villas in CMC Tsehay'}</li>
+                <li>{lang === 'am' ? 'በኦልድ ኤርፖርት የቅንጦት ቤቶች' : 'Luxury Homes in Old Airport'}</li>
+                <li>{lang === 'am' ? 'በሳርቤት የተሟሉ አፓርታማዎች' : 'Furnished Flats in Sarbet'}</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-3">
+                {t.footerAdamaTitle}
+              </h4>
+              <ul className="space-y-2 text-xs">
+                <li>{lang === 'am' ? 'በቦሌ ክ/ከተማ አዳማ የሚሸጡ ቪላዎች' : 'Villas for Sale in Bole, Adama'}</li>
+                <li>{lang === 'am' ? 'በደምበላ የሚከራዩ አፓርታማዎች' : 'Flats for Rent in Dembela'}</li>
+                <li>{lang === 'am' ? 'በፖስታ ቤት ሰፈር ቤቶች' : 'Homes near Posta Bet'}</li>
+                <li>{lang === 'am' ? 'በወንጂ መንገድ ራሳቸውን የቻሉ ቤቶች' : 'Standalone Houses on Wonji Road'}</li>
+                <li>{lang === 'am' ? 'በቦኩ ሰፈር ተመጣጣኝ ቤቶች' : 'Affordable Flats in Boku'}</li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <h4 style={{ color: 'white', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: 700 }}>
-              {t.footerAddisTitle}
-            </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.85rem' }}>
-              <li>{lang === 'am' ? 'በቦሌ የሚሸጡ አፓርታማዎች' : 'Flats for Sale in Bole'}</li>
-              <li>{lang === 'am' ? 'በካዛንቺስ የሚከራዩ ቤቶች' : 'Apartments for Rent in Kazanchis'}</li>
-              <li>{lang === 'am' ? 'በሲኤምሲ የሚሸጡ ቪላዎች' : 'Villas in CMC Tsehay'}</li>
-              <li>{lang === 'am' ? 'በኦልድ ኤርፖርት የቅንጦት ቤቶች' : 'Luxury Homes in Old Airport'}</li>
-              <li>{lang === 'am' ? 'በሳርቤት የተሟሉ አፓርታማዎች' : 'Furnished Flats in Sarbet'}</li>
-            </ul>
+          <div className="pt-8 border-t border-gray-800 text-center text-xs text-gray-500">
+            {t.footerCopyright}
           </div>
-
-          <div>
-            <h4 style={{ color: 'white', marginBottom: '0.75rem', fontSize: '0.95rem', fontWeight: 700 }}>
-              {t.footerAdamaTitle}
-            </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '0.85rem' }}>
-              <li>{lang === 'am' ? 'በቦሌ ክ/ከተማ አዳማ የሚሸጡ ቪላዎች' : 'Villas for Sale in Bole, Adama'}</li>
-              <li>{lang === 'am' ? 'በደምበላ የሚከራዩ አፓርታማዎች' : 'Flats for Rent in Dembela'}</li>
-              <li>{lang === 'am' ? 'በፖስታ ቤት ሰፈር ቤቶች' : 'Homes near Posta Bet'}</li>
-              <li>{lang === 'am' ? 'በወንጂ መንገድ ራሳቸውን የቻሉ ቤቶች' : 'Standalone Houses on Wonji Road'}</li>
-              <li>{lang === 'am' ? 'በቦኩ ሰፈር ተመጣጣኝ ቤቶች' : 'Affordable Flats in Boku'}</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          {t.footerCopyright}
         </div>
       </footer>
     </div>
