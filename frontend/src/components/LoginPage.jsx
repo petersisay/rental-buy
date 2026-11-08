@@ -8,14 +8,14 @@ import KedamiLogo from './KedamiLogo';
 
 const DEMO_USERS = [
   {
-    role: 'admin',
-    title: 'Platform Admin',
-    title_am: 'የሲስተም አስተዳዳሪ',
-    email: 'admin@kedami.et',
-    name: 'Kedami System Admin',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    color: 'amber',
-    desc: 'Approves new users & listings, reviews platform KPIs'
+    role: 'customer',
+    title: 'Customer (Rent / Buy)',
+    title_am: 'ደንበኛ (ቤት ተከራይ / ገዢ)',
+    email: 'customer.demo@kedami.et',
+    name: 'Tigist Alemu (ቀዳሚ ደንበኛ)',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80',
+    color: 'teal',
+    desc: 'Instant Google sign-in: rent & buy homes, schedule tours, save favorites with zero admin wait!'
   },
   {
     role: 'owner',
@@ -48,14 +48,14 @@ const DEMO_USERS = [
     desc: 'Showcases mega developments (Ayat, Tsehay, Noah)'
   },
   {
-    role: 'seeker',
-    title: 'Renter / Buyer',
-    title_am: 'ተከራይ / ገዢ',
-    email: 'seeker.demo@kedami.et',
-    name: 'Hirut Tadesse',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    color: 'teal',
-    desc: 'Searches, shortlists, and contacts property listers'
+    role: 'admin',
+    title: 'Platform Admin',
+    title_am: 'የሲስተም አስተዳዳሪ',
+    email: 'admin@kedami.et',
+    name: 'Kedami System Admin',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+    color: 'amber',
+    desc: 'Approves new users & listings, reviews platform KPIs'
   }
 ];
 
@@ -135,7 +135,7 @@ export default function LoginPage({
           name: gName.charAt(0).toUpperCase() + gName.slice(1),
           googleId: `google-${Date.now()}`,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=4285F4&color=fff`,
-          role: authMode === 'register' ? role : 'seeker'
+          role: authMode === 'register' ? role : (role || 'customer')
         })
       });
 
@@ -291,12 +291,27 @@ export default function LoginPage({
               </button>
             </div>
 
+            {/* Direct Google Sign-In for Customers Callout */}
+            <div className="mb-4 p-3 bg-teal-50 border border-teal-200 rounded-2xl text-xs text-teal-900 flex items-start gap-2.5 shadow-xs">
+              <Sparkles className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <strong className="block text-teal-950 font-bold">
+                  {isAmharic ? 'ለደንበኞች በቀጥታ በ Google ይግቡ!' : 'Direct Customer Sign-In via Google!'}
+                </strong>
+                <span className="text-teal-800">
+                  {isAmharic 
+                    ? 'ቤቶችን ለመከራየት ወይም ለመግዛት የሲስተም አስተዳዳሪ ማረጋገጫ ሳያስፈልግ በ Google አካውንትዎ በቀጥታ መግባት ይችላሉ።' 
+                    : 'Rent and buy properties directly using your Google account with zero admin approval wait time.'}
+                </span>
+              </div>
+            </div>
+
             {/* Google Sign-In Button */}
             <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-sm shadow-sm transition-all hover:shadow"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-800 font-bold text-sm shadow-sm transition-all hover:shadow hover:border-teal-500"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -316,7 +331,7 @@ export default function LoginPage({
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{googleLoading ? (isAmharic ? 'በመግባት ላይ...' : 'Connecting...') : t.authGoogleBtn}</span>
+              <span>{googleLoading ? (isAmharic ? 'በመግባት ላይ...' : 'Connecting...') : (isAmharic ? 'በ Google አካውንት በቀጥታ ይግቡ' : 'Continue with Google Account')}</span>
             </button>
 
             {/* Divider */}
@@ -380,10 +395,10 @@ export default function LoginPage({
                         onChange={(e) => setRole(e.target.value)}
                         className="w-full py-2.5 px-3 rounded-xl border border-gray-300 text-sm bg-white focus:ring-2 focus:ring-emerald-500 font-medium"
                       >
+                        <option value="customer">{t.authRoleCustomer || 'ደንበኛ (ቤት ተከራይ ወይም ገዢ)'}</option>
                         <option value="owner">{t.authRoleOwner}</option>
                         <option value="agent">{t.authRoleAgent}</option>
                         <option value="developer">{t.authRoleDeveloper}</option>
-                        <option value="seeker">{t.authRoleSeeker}</option>
                       </select>
                     </div>
 
