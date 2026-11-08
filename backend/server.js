@@ -102,10 +102,15 @@ app.post('/api/auth/login', async (req, res) => {
       }
 
       // Determine initial approval status:
-      // Pre-approved admin, demo domains and regular seekers get 'approved'
+      // Customers and Google users get instant 'approved' access (no admin delay)
+      // Pre-approved admin, demo domains and regular seekers also get 'approved'
       // New self-registered owners, agents and developers get 'pending' (requires Admin Approval)
-      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'seeker');
-      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et') || assignedRole === 'seeker';
+      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'customer');
+      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || 
+                             normalizedEmail.endsWith('@kedami.et') || 
+                             assignedRole === 'customer' || 
+                             assignedRole === 'seeker' || 
+                             !!googleId;
 
       user = new User({
         name: name || normalizedEmail.split('@')[0],
@@ -128,8 +133,12 @@ app.post('/api/auth/login', async (req, res) => {
         return res.json({ user, isNew: false });
       }
 
-      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'seeker');
-      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || normalizedEmail.endsWith('@kedami.et') || assignedRole === 'seeker';
+      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'customer');
+      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || 
+                             normalizedEmail.endsWith('@kedami.et') || 
+                             assignedRole === 'customer' || 
+                             assignedRole === 'seeker' || 
+                             !!googleId;
       const newId = `usr-${Date.now()}`;
 
       user = {
@@ -525,11 +534,11 @@ app.delete('/api/properties/:id', async (req, res) => {
   }
 });
 
-// POST /api/properties/:id/contact - Submit Inquiry Lead
+// POST /api/properties/:id/contact - Submit Inquiry / Booking Lead
 app.post('/api/properties/:id/contact', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, message } = req.body;
+    const { name, email, phone, message, type, property_title, price, city } = req.body;
 
     if (!name || !email || !phone) {
       return res.status(400).json({ error: 'Name, email, and phone number are required.' });
@@ -537,10 +546,15 @@ app.post('/api/properties/:id/contact', async (req, res) => {
 
     const submissionData = {
       property_id: id,
+      property_title: property_title || 'Residential Property',
+      type: type || 'inquiry',
+      price: price || '',
+      city: city || 'Addis Ababa',
       name,
       email,
       phone,
       message,
+      status: 'pending',
       createdAt: new Date()
     };
 
@@ -549,16 +563,18 @@ app.post('/api/properties/:id/contact', async (req, res) => {
       await sub.save();
       return res.json({
         status: 'success',
-        message: 'መልእክትዎ ደርሷል! የአካባቢው የሪል እስቴት ባለሙያ በቅርቡ ያነጋግርዎታል። (Enquiry submitted successfully!)',
-        id: sub.id
+        message: 'ማመልከቻዎ በተሳካ ሁኔታ ደርሷል! ባለቤቱ ወይም ወኪሉ በቅርቡ ያነጋግርዎታል። (Application submitted successfully!)',
+        id: sub.id,
+        inquiry: sub
       });
     } else {
       const memorySub = { ...submissionData, id: `contact-${Date.now()}` };
       inMemoryContacts.push(memorySub);
       return res.json({
         status: 'success',
-        message: 'መልእክትዎ ደርሷል! የአካባቢው የሪል እስቴት ባለሙያ በቅርቡ ያነጋግርዎታል። (Enquiry submitted successfully!)',
-        id: memorySub.id
+        message: 'ማመልከቻዎ በተሳካ ሁኔታ ደርሷል! ባለቤቱ ወይም ወኪሉ በቅርቡ ያነጋግርዎታል። (Application submitted successfully!)',
+        id: memorySub.id,
+        inquiry: memorySub
       });
     }
   } catch (err) {
@@ -566,14 +582,23 @@ app.post('/api/properties/:id/contact', async (req, res) => {
   }
 });
 
-// GET /api/contact - List inquiries (for Agents/Admins)
+// GET /api/contact - List inquiries (for Customers, Agents, Admins)
 app.get('/api/contact', async (req, res) => {
   try {
+    const { email } = req.query;
     if (!isInMemoryFallback) {
-      const list = await ContactSubmission.find().sort({ createdAt: -1 });
+      const filter = email ? { email: email.toLowerCase() } : {};
+      const list = await ContactSubmission.find(filter).sort({ createdAt: -1 });
       return res.json(list);
     }
-    return res.json(inMemoryContacts);
+    const filtered = email
+      ? inMemoryContacts.filter(c => c.email && c.email.toLowerCase() === email.toLowerCase())
+      : inMemoryContacts;
+    return res.json(filtered);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve enquiries' });
+  }
+});
   } catch (err) {
     res.status(500).json({ error: 'Failed to retrieve enquiries' });
   }
