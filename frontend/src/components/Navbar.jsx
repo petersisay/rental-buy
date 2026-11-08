@@ -4,6 +4,7 @@ import {
   LogOut, LogIn, Menu, X, ShieldCheck, Home, 
   Briefcase, Building, Search, UserCheck
 } from 'lucide-react';
+import KedamiLogo from './KedamiLogo';
 
 export default function Navbar({ 
   city, 
@@ -46,23 +47,15 @@ export default function Navbar({
         <div className="flex items-center justify-between h-16">
           {/* Logo Group */}
           <div 
-            className="flex items-center gap-3 cursor-pointer select-none"
+            className="flex items-center cursor-pointer select-none group"
             onClick={() => onNavigate(currentUser ? (currentUser.role === 'admin' ? 'admin' : 'landing') : 'landing')}
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-emerald-600/20">
-              ቀ
-            </div>
-            <div>
-              <div className="text-xl font-black tracking-tight text-gray-950 flex items-center gap-1.5">
-                <span>{isAmharic ? 'ቀዳሚ' : 'Kedami'}</span>
-                <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 uppercase tracking-wider">
-                  ET
-                </span>
-              </div>
-              <span className="text-[10px] font-semibold text-gray-400 block -mt-1 tracking-wider uppercase">
-                {t.brandTagline}
-              </span>
-            </div>
+            <KedamiLogo 
+              variant="image" 
+              size="md" 
+              showSubtitle={true} 
+              lang={lang} 
+            />
           </div>
 
           {/* Desktop Actions */}
