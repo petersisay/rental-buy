@@ -8,6 +8,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN for instant, zero-build utility styling across all browsers -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: '#009a44',
+                hover: '#007a35',
+                light: '#ecfdf5',
+                border: '#a7f3d0'
+              },
+              'ethiopian-gold': '#fed100',
+              'ethiopian-red': '#ef2a24'
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', '"Noto Sans Ethiopic"', 'system-ui', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
