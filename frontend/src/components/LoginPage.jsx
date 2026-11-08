@@ -4,6 +4,7 @@ import {
   Phone, ArrowRight, CheckCircle2, Clock, AlertCircle, 
   Sparkles, Lock, ArrowLeft, MapPin, Building
 } from 'lucide-react';
+import KedamiLogo from './KedamiLogo';
 
 const DEMO_USERS = [
   {
@@ -207,10 +208,15 @@ export default function LoginPage({
           <span>{isAmharic ? 'ወደ መነሻ ገጽ ተመለስ' : 'Back to Home'}</span>
         </button>
 
-        {/* Heading */}
+        {/* Brand Logo & Heading */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 text-white mb-4 shadow-lg shadow-emerald-600/20">
-            <ShieldCheck className="w-8 h-8" />
+          <div className="inline-flex justify-center mb-4">
+            <KedamiLogo 
+              variant="image" 
+              size="lg" 
+              showSubtitle={false} 
+              lang={lang} 
+            />
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
             {t.authPageTitle}
