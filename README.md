@@ -49,6 +49,11 @@
   4. 💼 **Agents & Brokers (ደላላዎች / ወኪሎች)**: Multi-property management dashboard with agency branding, photo uploads, and a real-time Client Leads Inbox.
   5. 🏗️ **Builders & Real Estate Developers (የሪል እስቴት አልሚዎች)**: Showcase mega residential projects (e.g. Ayat Real Estate, Tsehay Real Estate, Noah Real Estate, Flintstone Homes) with total units, handover year, and project master plans.
   6. 🛡️ **Platform Administrators (የሲስተሙ አስተዳዳሪዎች)**: Platform KPI statistics and review queue to verify, approve (ያጽድቁ), or reject (ውድቅ ያድርጉ) new user registrations and property submissions.
+- **Interactive Fully-Linked Footer (`Footer.jsx`)**:
+  - **Clickable City & Locality Searches**: Every location listed under Addis Ababa (Bole, Kazanchis, CMC, Old Airport, Sarbet, Ayat) and Adama (Bole Sub-City, Dembela, Posta Bet, Wonji Road, Boku, Geda) is an active filter link that automatically navigates to search results matching that locality.
+  - **Direct Role Portal Routing**: Immediate one-click links to Customer Portal, Owner Portal, Agent Dashboard, Developer Projects, and Admin Console.
+  - **Live Contact Actions**: One-click phone calling (`tel:`), email drafting (`mailto:`), and official Telegram channel (`@kedami_et`).
+  - **Interactive Legal Dialogs**: Clickable modals for Terms of Service, Privacy Policy, Safety & Verification, and FAQ.
 - **Bilingual Amharic (አማርኛ) / English**: Seamless one-click language toggle across all search filters, role forms, specifications, and notifications.
 - **Ethiopian Cities**: Addis Ababa (Bole, CMC, Kazanchis, Old Airport, Sarbet, Ayat, Summit, Lebu, Gerji) and Adama (Bole Sub-City, Dembela, Posta Bet, Wonji Road, Boku, Geda).
 - **ETB Currency**: Native formatting in Ethiopian Birr (`ብር` / `ETB`) with calculated rates per square meter (~ETB/m²).
