@@ -29,6 +29,11 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
         <span className="badge-type">
           {property.property_type === 'flat' ? t.flatBadge : t.houseBadge}
         </span>
+        {property.images && property.images.length > 1 && (
+          <span className="badge-photos" style={{ position: 'absolute', bottom: '0.6rem', left: '0.6rem', background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600, backdropFilter: 'blur(4px)' }}>
+            📷 {property.images.length}
+          </span>
+        )}
         <button 
           className={`btn-favorite-card ${isFavorite ? 'active' : ''}`}
           onClick={(e) => {
