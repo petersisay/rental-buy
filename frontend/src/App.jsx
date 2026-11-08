@@ -244,6 +244,10 @@ export default function App() {
     setFilters((prev) => ({ ...prev, city: newCity }));
   };
 
+  const handleFilterChange = (partial) => {
+    setFilters((prev) => ({ ...prev, ...partial }));
+  };
+
   const handleQuickSearchSubmit = (quickParams) => {
     setFilters((prev) => ({
       ...prev,
@@ -312,7 +316,8 @@ export default function App() {
         <>
           <HeroSearch
             filters={filters}
-            onFilterChange={setFilters}
+            onFilterChange={handleFilterChange}
+            onSearch={fetchProperties}
             totalResults={properties.length}
             lang={lang}
             t={t}
