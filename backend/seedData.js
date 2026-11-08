@@ -613,8 +613,6 @@ export const seedProjects = [
 
 export const seedUsers = [
   {
-    id: "usr-admin-1",
-    _id: "usr-admin-1",
     name: "Kedami System Admin (የሲስተም አስተዳዳሪ)",
     email: "admin@kedami.et",
     role: "admin",
@@ -625,8 +623,6 @@ export const seedUsers = [
     createdAt: new Date("2026-01-01T08:00:00Z")
   },
   {
-    id: "usr-owner-1",
-    _id: "usr-owner-1",
     name: "Dawit Haile (የቤት ባለቤት)",
     email: "owner.demo@kedami.et",
     role: "owner",
@@ -637,8 +633,6 @@ export const seedUsers = [
     createdAt: new Date("2026-02-15T09:30:00Z")
   },
   {
-    id: "usr-agent-1",
-    _id: "usr-agent-1",
     name: "Almaz Bekele (ደላላ/ወኪል)",
     email: "agent.demo@kedami.et",
     role: "agent",
@@ -650,8 +644,6 @@ export const seedUsers = [
     createdAt: new Date("2026-03-01T11:00:00Z")
   },
   {
-    id: "usr-developer-1",
-    _id: "usr-developer-1",
     name: "Ayat Real Estate Rep (የአያት አልሚ ወኪል)",
     email: "developer.demo@kedami.et",
     role: "developer",
@@ -663,8 +655,6 @@ export const seedUsers = [
     createdAt: new Date("2026-01-10T10:00:00Z")
   },
   {
-    id: "usr-customer-1",
-    _id: "usr-customer-1",
     name: "Tigist Alemu (ቀዳሚ ደንበኛ - ተከራይ/ገዢ)",
     email: "customer.demo@kedami.et",
     role: "customer",
@@ -675,8 +665,6 @@ export const seedUsers = [
     createdAt: new Date("2026-03-25T10:00:00Z")
   },
   {
-    id: "usr-seeker-1",
-    _id: "usr-seeker-1",
     name: "Hirut Tadesse (ተከራይ/ገዢ)",
     email: "seeker.demo@kedami.et",
     role: "seeker",
@@ -688,8 +676,6 @@ export const seedUsers = [
   },
   // Pending user signups awaiting admin approval
   {
-    id: "usr-pending-1",
-    _id: "usr-pending-1",
     name: "Yonas Melaku",
     email: "yonas.melaku@gmail.com",
     role: "agent",
@@ -701,8 +687,6 @@ export const seedUsers = [
     createdAt: new Date("2026-11-06T16:20:00Z")
   },
   {
-    id: "usr-pending-2",
-    _id: "usr-pending-2",
     name: "Sara Girma",
     email: "sara.girma@gmail.com",
     role: "owner",
