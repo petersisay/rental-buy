@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Sparkles, Search, Home, Briefcase, Building, 
-  ShieldCheck, User 
+  ShieldCheck, User, Key
 } from 'lucide-react';
 
 export default function RoleNavigation({ 
@@ -57,8 +57,9 @@ export default function RoleNavigation({
       ];
     }
 
-    // Default: seeker / buyer
+    // Default: customer / renter / buyer
     return [
+      { id: 'customer', label: t.navCustomer || 'የደንበኞች ፖርታል (ኪራይ / ግዢ)', icon: Key },
       { id: 'search', label: t.navHome, icon: Search },
       { id: 'landing', label: t.navLanding, icon: Sparkles },
       { id: 'profile', label: t.navProfile, icon: User }
