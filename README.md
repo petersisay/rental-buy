@@ -15,6 +15,13 @@
   - Sign in with Google Account or email address, or choose **Sign Up** to create a new profile with a chosen role (Owner, Broker, Developer, Seeker), city, and company.
   - **Dynamic Post-Login Rendering**: Upon authentication, users are automatically routed directly to their role-specific dashboard (e.g. Owners to Owner Portal, Brokers to Agent Portal, Developers to Developer Portal, Admin to Admin Portal, Seekers to Property Search).
   - Navigation tabs are tailored to the authenticated user's permission level.
+- **Dedicated Customer Role & Portal (Rent & Buy)**:
+  - **Direct Google Sign-In**: Customers can sign in directly using their Google account without requiring admin review wait times (`status: 'approved'`).
+  - **Rent & Buy Hub**: Filter by Rent vs. Buy, Addis Ababa & Adama localities, property types, and ETB pricing tiers.
+  - **Tour Scheduling & Instant Requests**: Schedule in-person property viewing tours or send direct rent/buy inquiries to landlords and developers.
+  - **Customer Inquiry Tracker**: Track all submitted requests and communication history in real-time.
+  - **Role Boundaries**: Clear permissions model where customers can rent, buy, schedule visits, and save favorites, while property creation is exclusively reserved for verified Owners, Agents, and Developers.
+  - **Personal Profile**: Customers have full access to manage their profile credentials, contact info, and bookmarked homes.
 - **Dedicated User Profile (`ProfilePage`)**:
   - Each authenticated user has their own profile page showing personal information, role badge, approval status, city, company, and quick metrics (properties listed, bookmarked homes).
   - Inline profile editing allowing users to update their full name, phone number, city, and company with backend persistence (`PATCH /api/auth/users/:id/profile`).
@@ -36,11 +43,12 @@
   - 1-click curated Ethiopian property sample photo chips (Bole Modern Flat, Old Airport Villa, Adama Townhouse, Living Room, European Kitchen).
   - Multi-image gallery carousel in property inspection modal.
 - **Dedicated Portals for Every Role**:
-  1. 🔍 **Public Search (ዋናው መፈለጊያ)**: Browse 20 verified properties across Addis Ababa and Adama with dynamic ETB budget tiers, Buy/Rent toggle, Flat/House filter, and interactive contact modal.
-  2. 🏠 **Property Owners (የቤት ባለቤቶች)**: Individual landlords & homeowners can post their flat or house directly for sale or rent with 0% brokerage fees and upload multiple photos.
-  3. 💼 **Agents & Brokers (ደላላዎች / ወኪሎች)**: Multi-property management dashboard with agency branding, photo uploads, and a real-time Client Leads Inbox.
-  4. 🏗️ **Builders & Real Estate Developers (የሪል እስቴት አልሚዎች)**: Showcase mega residential projects (e.g. Ayat Real Estate, Tsehay Real Estate, Noah Real Estate, Flintstone Homes) with total units, handover year, and project master plans.
-  5. 🛡️ **Platform Administrators (የሲስተሙ አስተዳዳሪዎች)**: Platform KPI statistics and review queue to verify, approve (ያጽድቁ), or reject (ውድቅ ያድርጉ) new user registrations and property submissions.
+  1. 🔑 **Customers / Renters & Buyers (የደንበኞች ፖርታል - ኪራይና ግዢ)**: Browse and filter verified properties to rent or buy, request in-person viewing tours, submit inquiries directly to landlords/developers, and track communications.
+  2. 🔍 **Public Search (ዋናው መፈለጊያ)**: Browse 20 verified properties across Addis Ababa and Adama with dynamic ETB budget tiers, Buy/Rent toggle, Flat/House filter, and interactive contact modal.
+  3. 🏠 **Property Owners (የቤት ባለቤቶች)**: Individual landlords & homeowners can post their flat or house directly for sale or rent with 0% brokerage fees and upload multiple photos.
+  4. 💼 **Agents & Brokers (ደላላዎች / ወኪሎች)**: Multi-property management dashboard with agency branding, photo uploads, and a real-time Client Leads Inbox.
+  5. 🏗️ **Builders & Real Estate Developers (የሪል እስቴት አልሚዎች)**: Showcase mega residential projects (e.g. Ayat Real Estate, Tsehay Real Estate, Noah Real Estate, Flintstone Homes) with total units, handover year, and project master plans.
+  6. 🛡️ **Platform Administrators (የሲስተሙ አስተዳዳሪዎች)**: Platform KPI statistics and review queue to verify, approve (ያጽድቁ), or reject (ውድቅ ያድርጉ) new user registrations and property submissions.
 - **Bilingual Amharic (አማርኛ) / English**: Seamless one-click language toggle across all search filters, role forms, specifications, and notifications.
 - **Ethiopian Cities**: Addis Ababa (Bole, CMC, Kazanchis, Old Airport, Sarbet, Ayat, Summit, Lebu, Gerji) and Adama (Bole Sub-City, Dembela, Posta Bet, Wonji Road, Boku, Geda).
 - **ETB Currency**: Native formatting in Ethiopian Birr (`ብር` / `ETB`) with calculated rates per square meter (~ETB/m²).
