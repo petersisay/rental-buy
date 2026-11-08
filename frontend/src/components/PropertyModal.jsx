@@ -4,6 +4,12 @@ import { X, MapPin, CheckCircle2, Mail, Send } from 'lucide-react';
 export default function PropertyModal({ property, onClose, initialContactMode = false, lang, t }) {
   const isAmharic = lang === 'am';
 
+  const allImages = (property?.images && property.images.length > 0)
+    ? property.images
+    : [property?.image_url || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"];
+
+  const [activeImage, setActiveImage] = useState(allImages[0]);
+
   const displayTitle = (isAmharic && property.title_am) ? property.title_am : property.title;
   const displayPrice = (isAmharic && property.price_formatted_am) ? property.price_formatted_am : property.price_formatted;
   const displayLocality = (isAmharic && property.locality_am) ? property.locality_am : property.locality;
@@ -36,7 +42,8 @@ export default function PropertyModal({ property, onClose, initialContactMode = 
     setErrorMsg('');
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/properties/${property.id}/contact`, {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const res = await fetch(`${apiBase}/api/properties/${property.id}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -61,11 +68,34 @@ export default function PropertyModal({ property, onClose, initialContactMode = 
           <X size={20} />
         </button>
 
-        <img 
-          src={property.image_url} 
-          alt={displayTitle} 
-          className="modal-hero-img"
-        />
+        <div className="modal-gallery-wrap">
+          <img 
+            src={activeImage} 
+            alt={displayTitle} 
+            className="modal-hero-img"
+          />
+          {allImages.length > 1 && (
+            <div className="modal-thumbnails" style={{ display: 'flex', gap: '0.5rem', padding: '0.65rem 1.25rem', overflowX: 'auto', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImage(img)}
+                  style={{
+                    border: activeImage === img ? '2px solid var(--primary)' : '2px solid transparent',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    padding: 0,
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  <img src={img} alt={`Thumb ${idx + 1}`} style={{ width: '60px', height: '42px', objectFit: 'cover' }} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="modal-body">
           <div className="modal-header-section">
