@@ -598,13 +598,6 @@ app.get('/api/contact', async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve enquiries' });
   }
 });
-      return res.json(list);
-    }
-    return res.json(inMemoryContacts);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to retrieve enquiries' });
-  }
-});
 
 // GET /api/developer-projects - List Developer Mega Projects
 app.get('/api/developer-projects', async (req, res) => {
