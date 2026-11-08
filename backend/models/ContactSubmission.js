@@ -29,6 +29,18 @@ const contactSubmissionSchema = new mongoose.Schema(
       type: String,
       default: ''
     },
+    inquiryType: {
+      type: String,
+      default: 'rent'
+    },
+    city: {
+      type: String,
+      default: 'Addis Ababa'
+    },
+    price: {
+      type: String,
+      default: ''
+    },
     status: {
       type: String,
       enum: ['new', 'contacted', 'closed'],
@@ -47,6 +59,10 @@ contactSubmissionSchema.set('toJSON', {
     return ret;
   }
 });
+
+// Performance indexes for Customer Inquiry Inbox and Agent Leads
+contactSubmissionSchema.index({ email: 1, createdAt: -1 });
+contactSubmissionSchema.index({ property_id: 1 });
 
 export const ContactSubmission =
   mongoose.models.ContactSubmission ||
