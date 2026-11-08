@@ -4,6 +4,7 @@ import {
   Search, ArrowRight, CheckCircle2, Users, Sparkles,
   ChevronRight, Award, Compass, TrendingUp, LogIn, UserPlus
 } from 'lucide-react';
+import KedamiLogo from './KedamiLogo';
 
 const HERO_IMAGES = [
   {
@@ -102,6 +103,17 @@ export default function LandingPage({
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          {/* Royal Crowned Kedami Brand Emblem */}
+          <div className="flex justify-center mb-6">
+            <KedamiLogo 
+              variant="image" 
+              size="lg" 
+              showSubtitle={false} 
+              isDark={true}
+              lang={lang} 
+            />
+          </div>
+
           {/* Ethiopian Flag Ribbon Accent */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/20 mb-6 shadow-lg">
             <span className="flex h-2.5 w-2.5 relative">
