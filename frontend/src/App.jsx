@@ -13,6 +13,7 @@ import AgentPortal from './components/AgentPortal';
 import DeveloperPortal from './components/DeveloperPortal';
 import AdminPortal from './components/AdminPortal';
 import CustomerPortal from './components/CustomerPortal';
+import Footer from './components/Footer';
 import { translations } from './locales/translations';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
@@ -301,6 +302,16 @@ export default function App() {
     }));
   };
 
+  const handleFilterLocality = (targetCity, targetLocality) => {
+    setFilters((prev) => ({
+      ...prev,
+      city: targetCity,
+      search: targetLocality
+    }));
+    setActivePortal('search');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const pendingCount = properties.filter((p) => p.status === 'pending').length;
 
   return (
@@ -571,56 +582,13 @@ export default function App() {
         t={t}
       />
 
-      {/* Responsive Footer */}
-      <footer className="footer bg-gray-950 text-gray-400 mt-auto border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-extrabold text-sm">
-                  ቀ
-                </div>
-                <h3 className="text-white font-extrabold text-lg m-0">
-                  {lang === 'am' ? 'ቀዳሚ' : 'kedami'}
-                </h3>
-              </div>
-              <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-md">
-                {t.footerAbout}
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-3">
-                {t.footerAddisTitle}
-              </h4>
-              <ul className="space-y-2 text-xs">
-                <li>{lang === 'am' ? 'በቦሌ የሚሸጡ አፓርታማዎች' : 'Flats for Sale in Bole'}</li>
-                <li>{lang === 'am' ? 'በካዛንቺስ የሚከራዩ ቤቶች' : 'Apartments for Rent in Kazanchis'}</li>
-                <li>{lang === 'am' ? 'በሲኤምሲ የሚሸጡ ቪላዎች' : 'Villas in CMC Tsehay'}</li>
-                <li>{lang === 'am' ? 'በኦልድ ኤርፖርት የቅንጦት ቤቶች' : 'Luxury Homes in Old Airport'}</li>
-                <li>{lang === 'am' ? 'በሳርቤት የተሟሉ አፓርታማዎች' : 'Furnished Flats in Sarbet'}</li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-3">
-                {t.footerAdamaTitle}
-              </h4>
-              <ul className="space-y-2 text-xs">
-                <li>{lang === 'am' ? 'በቦሌ ክ/ከተማ አዳማ የሚሸጡ ቪላዎች' : 'Villas for Sale in Bole, Adama'}</li>
-                <li>{lang === 'am' ? 'በደምበላ የሚከራዩ አፓርታማዎች' : 'Flats for Rent in Dembela'}</li>
-                <li>{lang === 'am' ? 'በፖስታ ቤት ሰፈር ቤቶች' : 'Homes near Posta Bet'}</li>
-                <li>{lang === 'am' ? 'በወንጂ መንገድ ራሳቸውን የቻሉ ቤቶች' : 'Standalone Houses on Wonji Road'}</li>
-                <li>{lang === 'am' ? 'በቦኩ ሰፈር ተመጣጣኝ ቤቶች' : 'Affordable Flats in Boku'}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-gray-800 text-center text-xs text-gray-500">
-            {t.footerCopyright}
-          </div>
-        </div>
-      </footer>
+      {/* Interactive Responsive Footer (Every Item is an Actionable Link) */}
+      <Footer
+        lang={lang}
+        t={t}
+        onNavigate={handleNavigate}
+        onFilterLocality={handleFilterLocality}
+      />
     </div>
   );
 }
