@@ -1,788 +1,837 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, Key, Heart, Search, CheckCircle2, 
-  MapPin, Clock, Calendar, Mail, Phone, User, 
-  AlertCircle, Building, Building2, Send, Filter,
-  ExternalLink, Sparkles, ShieldCheck, ChevronRight
+  Building2, Home, Heart, Search, Calendar, 
+  Phone, Mail, MapPin, CheckCircle2, Clock, Send, 
+  Sparkles, Filter, Eye, ArrowRight, UserCheck, 
+  ShieldCheck, AlertCircle, Building, Key, X
 } from 'lucide-react';
 import PropertyCard from './PropertyCard';
 
 export default function CustomerPortal({
-  currentUser,
-  properties,
-  favorites,
+  properties = [],
+  favorites = [],
   onToggleFavorite,
-  onViewProperty,
-  lang,
+  onOpenDetails,
+  currentUser,
+  onNavigate,
+  lang = 'am',
   t,
-  apiBase
+  apiBase = 'http://127.0.0.1:8000'
 }) {
   const isAmharic = lang === 'am';
-  const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'applications' | 'favorites' | 'projects'
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('all');
-  const [listingType, setListingType] = useState('all'); // 'all' | 'rent' | 'buy'
-  const [propertyType, setPropertyType] = useState('all'); // 'all' | 'flat' | 'house'
 
-  // Application / Booking Modal State
-  const [bookingProperty, setBookingProperty] = useState(null);
-  const [bookingType, setBookingType] = useState('rent'); // 'rent' | 'buy'
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingPhone, setBookingPhone] = useState(currentUser?.phone || '+251 9');
-  const [bookingMessage, setBookingMessage] = useState('');
-  const [bookingSubmitting, setBookingSubmitting] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
+  // Active Sub-tab in Customer Portal: 'browse', 'favorites', 'inquiries', 'developers'
+  const [activeTab, setActiveTab] = useState('browse');
+
+  // Filter States for Customer Browsing
+  const [filterPurpose, setFilterPurpose] = useState('all'); // 'all', 'Rent', 'Sale'
+  const [filterCity, setFilterCity] = useState('all'); // 'all', 'Addis Ababa', 'Adama'
+  const [filterType, setFilterType] = useState('all'); // 'all', 'Flat', 'House'
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Customer Inquiries state
-  const [myInquiries, setMyInquiries] = useState([]);
-  const [loadingInquiries, setLoadingInquiries] = useState(false);
+  const [inquiries, setInquiries] = useState([]);
+  const [inquiriesLoading, setInquiriesLoading] = useState(false);
 
-  // Developer projects
+  // Quick Rent/Buy/Tour Modal State
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [inquiryType, setInquiryType] = useState('rent'); // 'rent', 'buy', 'tour'
+  const [tourDate, setTourDate] = useState('');
+  const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '');
+  const [customerMessage, setCustomerMessage] = useState('');
+  const [submittingInquiry, setSubmittingInquiry] = useState(false);
+  const [inquirySuccessMsg, setInquirySuccessMsg] = useState('');
+  const [inquiryErrorMsg, setInquiryErrorMsg] = useState('');
+
+  // Developer projects state
   const [developerProjects, setDeveloperProjects] = useState([]);
 
-  // Fetch inquiries for this customer
-  const fetchMyInquiries = async () => {
-    if (!currentUser?.email) return;
-    setLoadingInquiries(true);
-    try {
-      const res = await fetch(`${apiBase}/api/contact?email=${encodeURIComponent(currentUser.email)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMyInquiries(Array.isArray(data) ? data : []);
-      }
-    } catch (e) {
-      console.error('Failed to fetch customer inquiries:', e);
-    } finally {
-      setLoadingInquiries(false);
+  // Fetch developer projects & inquiries for current customer
+  useEffect(() => {
+    fetchDeveloperProjects();
+    if (currentUser?.email) {
+      fetchCustomerInquiries();
     }
-  };
+  }, [currentUser?.email]);
 
-  // Fetch developer projects
-  const fetchProjects = async () => {
+  const fetchDeveloperProjects = async () => {
     try {
       const res = await fetch(`${apiBase}/api/developer-projects`);
       if (res.ok) {
         const data = await res.json();
-        setDeveloperProjects(Array.isArray(data) ? data : []);
+        setDeveloperProjects(data);
       }
     } catch (e) {
       console.error('Failed to fetch developer projects:', e);
     }
   };
 
-  useEffect(() => {
-    fetchMyInquiries();
-    fetchProjects();
-  }, [currentUser]);
-
-  // Handle direct Rent/Buy click from cards
-  const handleOpenBooking = (property, type = 'rent') => {
-    setBookingProperty(property);
-    setBookingType(type);
-    setBookingSuccess(false);
-    setBookingMessage(
-      isAmharic 
-        ? `ሰላም፣ ይህንን ${property.title_am || property.title} ${type === 'rent' ? 'መከራየት' : 'መግዛት'} እፈልጋለሁ። እባክዎ ተጨማሪ መረጃና የጉብኝት ሰዓት ይንገሩኝ።`
-        : `Hello, I am interested in ${type === 'rent' ? 'renting' : 'purchasing'} this property: ${property.title}. Please provide viewing availability.`
-    );
+  const fetchCustomerInquiries = async () => {
+    if (!currentUser?.email) return;
+    setInquiriesLoading(true);
+    try {
+      const res = await fetch(`${apiBase}/api/contact?email=${encodeURIComponent(currentUser.email)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setInquiries(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch inquiries:', e);
+    } finally {
+      setInquiriesLoading(false);
+    }
   };
 
-  // Submit Rent / Buy Application
-  const handleSubmitBooking = async (e) => {
+  // Open Inquiry / Tour Modal
+  const handleOpenInquiryModal = (property, type = 'rent') => {
+    setSelectedProperty(property);
+    setInquiryType(type);
+    setTourDate('');
+    setCustomerMessage(
+      type === 'rent'
+        ? (isAmharic ? `ሰላም፣ ይህንን ቤት (${property.title_am || property.title}) በኪራይ ለመውሰድ እፈልጋለሁ። ተጨማሪ መረጃ ያካፍሉኝ።` : `Hello, I am interested in renting this property (${property.title}). Please share lease terms.`)
+        : type === 'buy'
+        ? (isAmharic ? `ሰላም፣ ይህንን ቤት (${property.title_am || property.title}) ለመግዛት ፍላጎት አለኝ። የዋጋና የክፍያ ሁኔታዎችን ያብራሩልኝ።` : `Hello, I am interested in purchasing this property (${property.title}). Please provide purchase details.`)
+        : (isAmharic ? `ሰላም፣ ይህንን ቤት በአካል ጎብኝቼ ማየት እፈልጋለሁ። ምቹ ቀንና ሰዓት ያስይዙልኝ።` : `Hello, I would like to schedule an in-person viewing tour for this property.`)
+    );
+    setInquirySuccessMsg('');
+    setInquiryErrorMsg('');
+  };
+
+  // Submit Inquiry / Tour Request
+  const handleSubmitInquiry = async (e) => {
     e.preventDefault();
-    if (!bookingProperty || !currentUser) return;
-    setBookingSubmitting(true);
+    if (!selectedProperty) return;
+
+    setSubmittingInquiry(true);
+    setInquiryErrorMsg('');
+    setInquirySuccessMsg('');
 
     try {
-      const targetId = bookingProperty.id || bookingProperty._id;
-      const res = await fetch(`${apiBase}/api/properties/${targetId}/contact`, {
+      const propId = selectedProperty._id || selectedProperty.id;
+      const res = await fetch(`${apiBase}/api/properties/${propId}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: currentUser.name || 'Customer',
-          email: currentUser.email,
-          phone: bookingPhone,
-          type: bookingType,
-          property_title: isAmharic ? (bookingProperty.title_am || bookingProperty.title) : bookingProperty.title,
-          city: bookingProperty.city,
-          price: bookingProperty.price,
-          message: `${bookingMessage} [የታሰበበት ቀን: ${bookingDate || 'አስቸኳይ'}]`
+          name: currentUser?.name || 'Customer',
+          email: currentUser?.email,
+          phone: customerPhone || currentUser?.phone || '+251 911 000000',
+          inquiryType,
+          propertyTitle: isAmharic ? (selectedProperty.title_am || selectedProperty.title) : selectedProperty.title,
+          city: selectedProperty.city,
+          price: selectedProperty.price,
+          message: `${customerMessage} ${tourDate ? `(የተመረጠ ቀን / Preferred Date: ${tourDate})` : ''}`
         })
       });
 
-      if (res.ok) {
-        setBookingSuccess(true);
-        fetchMyInquiries();
-        setTimeout(() => {
-          setBookingProperty(null);
-          setBookingSuccess(false);
-        }, 2200);
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit inquiry');
+
+      setInquirySuccessMsg(
+        isAmharic 
+          ? 'ጥያቄዎ በተሳካ ሁኔታ ተልኳል! የቤቱ ባለቤት ወይም ወኪል በቅርቡ ያነጋግርዎታል።' 
+          : 'Your inquiry has been submitted! The property lister will contact you shortly.'
+      );
+
+      // Refresh inquiries list
+      fetchCustomerInquiries();
+
+      setTimeout(() => {
+        setSelectedProperty(null);
+      }, 2000);
     } catch (err) {
-      console.error(err);
+      setInquiryErrorMsg(err.message || 'Error submitting request');
     } finally {
-      setBookingSubmitting(false);
+      setSubmittingInquiry(false);
     }
   };
 
-  // Filter Properties
+  // Filter properties
   const filteredProperties = properties.filter((p) => {
-    // Only approved properties for customer
-    if (p.status && p.status !== 'approved') return false;
-
-    // Search query
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = (p.title || '').toLowerCase().includes(q) || (p.title_am || '').toLowerCase().includes(q);
-      const matchLoc = (p.locality || '').toLowerCase().includes(q) || (p.locality_am || '').toLowerCase().includes(q);
-      if (!matchTitle && !matchLoc) return false;
+    if (filterPurpose !== 'all') {
+      const pPurpose = p.purpose || (p.badge === 'RENT' ? 'Rent' : 'Sale');
+      if (filterPurpose === 'Rent' && pPurpose !== 'Rent') return false;
+      if (filterPurpose === 'Sale' && pPurpose !== 'Sale') return false;
     }
-
-    // City
-    if (selectedCity !== 'all' && p.city !== selectedCity) return false;
-
-    // Listing Type (rent vs buy)
-    if (listingType !== 'all' && p.listing_type !== listingType) return false;
-
-    // Property Type (flat vs house)
-    if (propertyType !== 'all' && p.property_type !== propertyType) return false;
-
+    if (filterCity !== 'all' && p.city !== filterCity) return false;
+    if (filterType !== 'all') {
+      if (filterType === 'Flat' && p.type !== 'Flat') return false;
+      if (filterType === 'House' && p.type !== 'House') return false;
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchLoc = p.locality?.toLowerCase().includes(q);
+      const matchCity = p.city?.toLowerCase().includes(q);
+      const matchTitle = (p.title || '').toLowerCase().includes(q) || (p.title_am || '').toLowerCase().includes(q);
+      if (!matchLoc && !matchCity && !matchTitle) return false;
+    }
     return true;
   });
 
   return (
-    <div className="min-h-screen bg-slate-50/60 pb-16">
-      {/* ========================================================= */}
-      {/* 1. CUSTOMER WELCOME BANNER                                */}
-      {/* ========================================================= */}
-      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* ========================================================= */}
+        {/* 1. CUSTOMER WELCOME BANNER & STATS                       */}
+        {/* ========================================================= */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-900 via-slate-900 to-emerald-950 text-white p-6 sm:p-8 shadow-xl">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 -mt-10 -mr-10 w-72 h-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/3 -mb-10 w-64 h-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold mb-3">
-                <ShieldCheck className="w-4 h-4" />
-                <span>{isAmharic ? 'የተረጋገጠ ደንበኛ (Verified Customer)' : 'Verified Customer Profile'}</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-bold border border-teal-500/30 mb-3">
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>{isAmharic ? 'ቀዳሚ የተረጋገጠ ደንበኛ' : 'Kedami Verified Customer'}</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-                <span>{isAmharic ? `እንኳን ደህና መጡ፣ ${currentUser?.name || 'ደንበኛ'}!` : `Welcome, ${currentUser?.name || 'Customer'}!`}</span>
-                <span className="text-amber-400">👋</span>
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                {isAmharic ? `እንኳን ደህና መጡ፣ ${currentUser?.name || 'ውድ ደንበኛ'}!` : `Welcome, ${currentUser?.name || 'Customer'}!`}
               </h1>
-              <p className="mt-1 text-sm text-emerald-100/90 max-w-2xl leading-relaxed">
-                {t.customerSubtitle}
+              <p className="mt-2 text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+                {t.customerWelcomeSub || 'በአዲስ አበባ እና በአዳማ ውስጥ የተረጋገጡ ቤቶችን ይፈልጉ፣ ይከራዩ ወይም ይግዙ።'}
               </p>
             </div>
 
-            {/* Quick Metrics Header */}
+            {/* Quick Action Profile Button */}
             <div className="flex items-center gap-3">
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-center min-w-[100px]">
-                <span className="block text-2xl font-black text-amber-400">{filteredProperties.length}</span>
-                <span className="text-[10px] uppercase font-bold text-emerald-200 tracking-wider">
-                  {isAmharic ? 'የሚገኙ ቤቶች' : 'Live Homes'}
-                </span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-center min-w-[100px]">
-                <span className="block text-2xl font-black text-emerald-300">{myInquiries.length}</span>
-                <span className="text-[10px] uppercase font-bold text-emerald-200 tracking-wider">
-                  {isAmharic ? 'ማመልከቻዎች' : 'Inquiries'}
-                </span>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3 text-center min-w-[100px]">
-                <span className="block text-2xl font-black text-rose-300">{favorites.length}</span>
-                <span className="text-[10px] uppercase font-bold text-emerald-200 tracking-wider">
-                  {isAmharic ? 'የተመረጡ' : 'Favorites'}
-                </span>
-              </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('profile')}
+                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 transition-all flex items-center gap-2 shadow-sm"
+              >
+                <span>{isAmharic ? 'የእኔ የግል ገጽ' : 'My Profile'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Customer Privilege Note: Cannot post properties, but has direct buy/rent power */}
-          <div className="mt-6 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-200">
-            <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+          {/* Quick Stats Grid */}
+          <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-xs text-slate-400 block font-medium">
+                {isAmharic ? 'የሚከራዩ/የሚሸጡ ቤቶች' : 'Available Properties'}
+              </span>
+              <span className="text-2xl font-black text-white mt-1 block">
+                {properties.length}+
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-xs text-slate-400 block font-medium">
+                {isAmharic ? 'የተመረጡ ቤቶች' : 'Saved Favorites'}
+              </span>
+              <span className="text-2xl font-black text-amber-300 mt-1 block">
+                {favorites.length}
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-xs text-slate-400 block font-medium">
+                {isAmharic ? 'የተላኩ ጥያቄዎች' : 'My Requests Sent'}
+              </span>
+              <span className="text-2xl font-black text-teal-300 mt-1 block">
+                {inquiries.length}
+              </span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-xs text-slate-400 block font-medium">
+                {isAmharic ? 'ዋና ዋና ከተሞች' : 'Active Cities'}
+              </span>
+              <span className="text-2xl font-black text-emerald-300 mt-1 block">
+                2 (Addis & Adama)
+              </span>
+            </div>
+          </div>
+
+          {/* Customer Role Constraint Notice */}
+          <div className="mt-4 p-3 rounded-xl bg-teal-950/60 border border-teal-500/30 text-xs text-teal-200 flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-teal-400 flex-shrink-0 mt-0.5" />
             <span>
-              {t.customerNoAddNotice}
+              {t.customerNoPostNotice || 'እንደ ደንበኛ (ተከራይ/ገዢ) ቤቶችን መፈለግ፣ መምረጥ እና የኪራይ/የግዢ ጥያቄዎችን በቀጥታ መላክ ይችላሉ። አዳዲስ ቤቶችን መለጠፍ የተፈቀደው ለተረጋገጡ የቤት ባለቤቶች፣ ደላላዎች እና አልሚዎች ብቻ ነው።'}
             </span>
           </div>
         </div>
-      </div>
 
-      {/* ========================================================= */}
-      {/* 2. TAB NAVIGATION                                         */}
-      {/* ========================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-1.5 flex flex-wrap gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab('browse')}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              activeTab === 'browse'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Home className="w-4 h-4" />
-            <span>{t.customerTabBrowse}</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-black/10">
-              {filteredProperties.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('applications')}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              activeTab === 'applications'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Send className="w-4 h-4" />
-            <span>{t.customerTabInquiries}</span>
-            {myInquiries.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-amber-400 text-gray-950 font-black">
-                {myInquiries.length}
+        {/* ========================================================= */}
+        {/* 2. CUSTOMER PORTAL TAB SWITCHER                          */}
+        {/* ========================================================= */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-3">
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab('browse')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'browse'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <Search className="w-4 h-4" />
+              <span>{t.customerTabBrowse || 'ቤቶችን ይከራዩ / ይግዙ'}</span>
+              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-black/20 text-[11px]">
+                {filteredProperties.length}
               </span>
-            )}
-          </button>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('favorites')}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              activeTab === 'favorites'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-            <span>{t.customerTabFavorites}</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-black/10">
-              {favorites.length}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('favorites')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'favorites'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <Heart className="w-4 h-4 text-rose-500" />
+              <span>{t.customerTabFavorites || 'የተመረጡ ቤቶች'}</span>
+              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-800 text-[11px] font-bold">
+                {favorites.length}
+              </span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('projects')}
-            className={`flex-1 min-w-[140px] py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-              activeTab === 'projects'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Building2 className="w-4 h-4 text-amber-500" />
-            <span>{t.customerTabProjects}</span>
-            <span className="ml-1 px-1.5 py-0.2 rounded-full text-[10px] bg-black/10">
-              {developerProjects.length || 4}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('inquiries')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'inquiries'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <Clock className="w-4 h-4 text-teal-600" />
+              <span>{t.customerTabInquiries || 'የእኔ ጥያቄዎች'}</span>
+              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-teal-100 text-teal-800 text-[11px] font-bold">
+                {inquiries.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('developers')}
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'developers'
+                  ? 'bg-teal-600 text-white shadow-md shadow-teal-600/20'
+                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+              }`}
+            >
+              <Building className="w-4 h-4 text-purple-600" />
+              <span>{t.customerTabDevelopers || 'የሪል እስቴት ፕሮጀክቶች'}</span>
+              <span className="ml-1 px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-800 text-[11px] font-bold">
+                {developerProjects.length}
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* ========================================================= */}
-      {/* 3. TAB 1: BROWSE & DIRECT RENT / BUY                      */}
-      {/* ========================================================= */}
-      {activeTab === 'browse' && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          {/* Quick Filter Strip */}
-          <div className="bg-white rounded-2xl p-4 border border-gray-200 mb-6 shadow-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {/* Keyword Search */}
-              <div className="relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder={isAmharic ? 'ቦታ፣ ሰፈር፣ ወይም የቤት ስም...' : 'Search locality, building...'}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-xs font-medium rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-
-              {/* Listing Type: All, Rent, Buy */}
-              <div className="flex rounded-xl bg-gray-100 p-1">
+        {/* ========================================================= */}
+        {/* 3. TAB CONTENT: 1. BROWSE RENT & BUY PROPERTIES           */}
+        {/* ========================================================= */}
+        {activeTab === 'browse' && (
+          <div className="space-y-6">
+            {/* Quick Customer Filter Bar */}
+            <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+              {/* Rent / Buy Toggle */}
+              <div className="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl">
                 <button
                   type="button"
-                  onClick={() => setListingType('all')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    listingType === 'all' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500'
+                  onClick={() => setFilterPurpose('all')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    filterPurpose === 'all' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {isAmharic ? 'ሁሉንም' : 'All'}
+                  {isAmharic ? 'ሁሉም' : 'All'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setListingType('rent')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    listingType === 'rent' ? 'bg-emerald-600 text-white shadow-xs' : 'text-gray-500'
+                  onClick={() => setFilterPurpose('Rent')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    filterPurpose === 'Rent' ? 'bg-emerald-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {isAmharic ? 'የሚከራዩ' : 'To Rent'}
+                  {isAmharic ? 'ኪራይ (Rent)' : 'Rent'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setListingType('buy')}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    listingType === 'buy' ? 'bg-emerald-600 text-white shadow-xs' : 'text-gray-500'
+                  onClick={() => setFilterPurpose('Sale')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    filterPurpose === 'Sale' ? 'bg-amber-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {isAmharic ? 'የሚሸጡ' : 'To Buy'}
+                  {isAmharic ? 'ሽያጭ (Buy)' : 'Buy'}
                 </button>
               </div>
 
               {/* City Filter */}
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full py-2 px-3 text-xs font-bold rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="all">{isAmharic ? 'ሁሉም ከተሞች (Addis & Adama)' : 'All Cities'}</option>
-                <option value="Addis Ababa">{isAmharic ? 'አዲስ አበባ (Addis Ababa)' : 'Addis Ababa'}</option>
-                <option value="Adama">{isAmharic ? 'አዳማ (Adama)' : 'Adama'}</option>
-              </select>
+              <div className="flex items-center gap-2">
+                <select
+                  value={filterCity}
+                  onChange={(e) => setFilterCity(e.target.value)}
+                  className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800"
+                >
+                  <option value="all">{isAmharic ? 'ሁሉም ከተሞች' : 'All Cities'}</option>
+                  <option value="Addis Ababa">{isAmharic ? 'አዲስ አበባ' : 'Addis Ababa'}</option>
+                  <option value="Adama">{isAmharic ? 'አዳማ' : 'Adama'}</option>
+                </select>
 
-              {/* Property Type Filter */}
-              <select
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value)}
-                className="w-full py-2 px-3 text-xs font-bold rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="all">{isAmharic ? 'ሁሉም የቤት አይነቶች' : 'All Property Types'}</option>
-                <option value="flat">{isAmharic ? 'አፓርታማ / ፎቅ' : 'Flat / Apartment'}</option>
-                <option value="house">{isAmharic ? 'ቪላ / መኖሪያ ቤት' : 'Villa / House'}</option>
-              </select>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800"
+                >
+                  <option value="all">{isAmharic ? 'ሁሉም ዓይነት' : 'All Types'}</option>
+                  <option value="Flat">{isAmharic ? 'አፓርታማ' : 'Apartment/Flat'}</option>
+                  <option value="House">{isAmharic ? 'ቪላ / ቤት' : 'Villa / House'}</option>
+                </select>
+              </div>
+
+              {/* Keyword Search */}
+              <div className="flex-1 max-w-xs relative">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder={isAmharic ? 'ቦሌ፣ ሲኤምሲ፣ ደንበላ...' : 'Bole, CMC, Dembela...'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Properties Grid */}
-          {filteredProperties.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-gray-200">
-              <Home className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-gray-900">{t.noPropertiesFound}</h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">{t.noPropertiesDesc}</p>
-              <button
-                type="button"
-                onClick={() => { setSearchQuery(''); setSelectedCity('all'); setListingType('all'); setPropertyType('all'); }}
-                className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
-              >
-                {t.btnResetFilters}
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((property) => {
-                const propId = property.id || property._id;
-                const isFavorite = favorites.some((f) => f.id === propId || f._id === propId);
-                const isRent = property.listing_type === 'rent';
-
-                return (
-                  <div key={propId} className="relative group bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col">
-                    {/* Render existing PropertyCard header & gallery */}
+            {/* Properties Grid with Rent / Buy / Tour Action Buttons */}
+            {filteredProperties.length === 0 ? (
+              <div className="p-12 text-center bg-white rounded-3xl border border-gray-200">
+                <Home className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-gray-900">
+                  {t.noPropertiesFound || 'ምንም የተገኘ ቤት የለም'}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isAmharic ? 'እባክዎ የማጣሪያ ምርጫዎችዎን ያስተካክሉ።' : 'Please adjust your filter criteria.'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProperties.map((property) => (
+                  <div key={property._id || property.id} className="relative group bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
                     <PropertyCard
                       property={property}
+                      onContact={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
+                      onToggleFavorite={onToggleFavorite}
+                      isFavorite={favorites.some((f) => f.id === property.id || f.id === property._id)}
+                      onCardClick={onOpenDetails}
                       lang={lang}
                       t={t}
-                      isFavorite={isFavorite}
-                      onToggleFavorite={onToggleFavorite}
-                      onViewDetails={onViewProperty}
-                      onContactAgent={onViewProperty}
                     />
 
-                    {/* Customer Action Bar: Direct Rent or Buy Buttons */}
-                    <div className="p-4 bg-slate-50 border-t border-gray-100 flex items-center gap-2 mt-auto">
+                    {/* Customer Action Bar */}
+                    <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-2">
                       <button
                         type="button"
-                        onClick={() => handleOpenBooking(property, isRent ? 'rent' : 'buy')}
-                        className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all ${
-                          isRent 
-                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                            : 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                        onClick={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
+                        className={`flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 text-white ${
+                          property.purpose === 'Rent' 
+                            ? 'bg-emerald-600 hover:bg-emerald-700' 
+                            : 'bg-amber-600 hover:bg-amber-700'
                         }`}
                       >
                         <Key className="w-3.5 h-3.5" />
-                        <span>{isRent ? (isAmharic ? 'አሁን ይከራዩ' : 'Rent Now') : (isAmharic ? 'አሁን ይግዙ' : 'Buy Now')}</span>
+                        <span>
+                          {property.purpose === 'Rent' 
+                            ? (isAmharic ? 'ይከራዩ' : 'Rent Now') 
+                            : (isAmharic ? 'ይግዙ' : 'Buy Now')}
+                        </span>
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => onViewProperty(property)}
-                        className="py-2.5 px-3.5 rounded-xl font-bold text-xs bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 transition-colors"
+                        onClick={() => handleOpenInquiryModal(property, 'tour')}
+                        className="py-2 px-3 rounded-xl text-xs font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-100 transition-all flex items-center gap-1.5"
                       >
-                        {t.btnViewDetails}
+                        <Calendar className="w-3.5 h-3.5 text-teal-600" />
+                        <span>{isAmharic ? 'ጉብኝት' : 'Tour'}</span>
                       </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* 4. TAB 2: MY RENT & BUY APPLICATIONS                      */}
-      {/* ========================================================= */}
-      {activeTab === 'applications' && (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-sm">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-              <div>
-                <h2 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                  <Send className="w-5 h-5 text-emerald-600" />
-                  <span>{t.customerTabInquiries}</span>
-                </h2>
-                <p className="text-xs text-gray-500 mt-1">
-                  {isAmharic 
-                    ? 'ለባለቤቶች እና ለወኪሎች ያስገቧቸው የኪራይና የግዢ ማመልከቻዎች ዝርዝር።' 
-                    : 'Track your submitted property applications, viewings, and rental inquiries.'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={fetchMyInquiries}
-                className="px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50"
-              >
-                {isAmharic ? 'አድስ (Refresh)' : 'Refresh'}
-              </button>
-            </div>
-
-            {loadingInquiries ? (
-              <div className="py-12 text-center text-xs text-gray-500">
-                {isAmharic ? 'ማመልከቻዎች በመጫን ላይ...' : 'Loading your inquiries...'}
-              </div>
-            ) : myInquiries.length === 0 ? (
-              <div className="py-12 text-center">
-                <Send className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-gray-900">
-                  {isAmharic ? 'እስካሁን ምንም ማመልከቻ አላስገቡም' : 'No applications submitted yet'}
-                </h3>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
-                  {isAmharic 
-                    ? 'የሚፈልጉትን ቤት ከዝርዝሩ ውስጥ መርጠው "አሁን ይከራዩ" ወይም "አሁን ይግዙ" የሚለውን በመጫን ማመልከት ይችላሉ።' 
-                    : 'Explore the property catalog and tap "Rent Now" or "Buy Now" to contact landlords directly.'}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('browse')}
-                  className="mt-4 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700"
-                >
-                  {isAmharic ? 'ቤቶችን ያስሱ' : 'Browse Properties'}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {myInquiries.map((inq, idx) => (
-                  <div key={inq.id || inq._id || idx} className="p-4 rounded-2xl bg-slate-50 border border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                          inq.type === 'buy' ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
-                        }`}>
-                          {inq.type === 'buy' ? (isAmharic ? 'የግዢ ጥያቄ' : 'Buy Inquiry') : (isAmharic ? 'የኪራይ ጥያቄ' : 'Rent Application')}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(inq.createdAt).toLocaleDateString(isAmharic ? 'am-ET' : 'en-US')}
-                        </span>
-                      </div>
-                      <h4 className="text-sm font-bold text-gray-900">
-                        {inq.property_title || 'Residential Property'}
-                      </h4>
-                      <p className="text-xs text-gray-600 mt-1 max-w-xl">
-                        {inq.message}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{isAmharic ? 'በሂደት ላይ (Sent)' : 'Sent / In Review'}</span>
-                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ========================================================= */}
-      {/* 5. TAB 3: SAVED FAVORITES                                 */}
-      {/* ========================================================= */}
-      {activeTab === 'favorites' && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          {favorites.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-gray-200">
-              <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-gray-900">
-                {isAmharic ? 'ምንም የተመረጡ ቤቶች የሉም' : 'No saved properties yet'}
-              </h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
-                {isAmharic 
-                  ? 'ቤቶችን በሚያሱሱበት ወቅት የልብ ቅርጽ ምልክቷን በመጫን ወደዚህ ማስቀመጥ ይችላሉ።' 
-                  : 'Bookmark apartments and villas while browsing to easily compare and contact owners.'}
+        {/* ========================================================= */}
+        {/* 4. TAB CONTENT: 2. SAVED FAVORITES                       */}
+        {/* ========================================================= */}
+        {activeTab === 'favorites' && (
+          <div>
+            <div className="mb-4">
+              <h2 className="text-xl font-black text-gray-950">
+                {isAmharic ? `የተመረጡ ቤቶች (${favorites.length})` : `Saved Properties (${favorites.length})`}
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                {isAmharic ? 'ያስቀመጧቸውን ቤቶች እዚህ ጋር ይመልከቱና በቀጥታ የኪራይ ወይም የግዢ ጥያቄ ይላኩ።' : 'Review your shortlisted homes and initiate rent or buy requests.'}
               </p>
-              <button
-                type="button"
-                onClick={() => setActiveTab('browse')}
-                className="mt-4 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold"
-              >
-                {isAmharic ? 'ቤቶችን ያስሱ' : 'Browse Properties'}
-              </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favorites.map((property) => {
-                const propId = property.id || property._id;
-                const isRent = property.listing_type === 'rent';
 
-                return (
-                  <div key={propId} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs flex flex-col">
+            {favorites.length === 0 ? (
+              <div className="p-12 text-center bg-white rounded-3xl border border-gray-200">
+                <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-gray-900">
+                  {isAmharic ? 'እስካሁን ምንም ቤት አልመረጡም' : 'No Favorite Properties Saved Yet'}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                  {isAmharic ? 'ቤቶችን በሚያስሱበት ጊዜ የልብ ቅርጽ ምልክቱን በመንካት እዚህ ማከማቸት ይችላሉ።' : 'Browse properties and tap the heart icon to save them here for quick access.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('browse')}
+                  className="mt-4 px-5 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold"
+                >
+                  {isAmharic ? 'ቤቶችን ያስሱ' : 'Browse Properties'}
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favorites.map((property) => (
+                  <div key={property._id || property.id} className="relative group bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between">
                     <PropertyCard
                       property={property}
+                      onContact={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
+                      onToggleFavorite={onToggleFavorite}
+                      isFavorite={true}
+                      onCardClick={onOpenDetails}
                       lang={lang}
                       t={t}
-                      isFavorite={true}
-                      onToggleFavorite={onToggleFavorite}
-                      onViewDetails={onViewProperty}
-                      onContactAgent={onViewProperty}
                     />
-                    <div className="p-4 bg-slate-50 border-t border-gray-100 flex items-center gap-2 mt-auto">
+                    <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => handleOpenBooking(property, isRent ? 'rent' : 'buy')}
-                        className="flex-1 py-2.5 px-3 rounded-xl font-black text-xs bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition-all flex items-center justify-center gap-1.5"
+                        onClick={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
+                        className="flex-1 py-2 px-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-black transition-all flex items-center justify-center gap-1.5"
                       >
                         <Key className="w-3.5 h-3.5" />
-                        <span>{isRent ? (isAmharic ? 'አሁን ይከራዩ' : 'Rent Now') : (isAmharic ? 'አሁን ይግዙ' : 'Buy Now')}</span>
+                        <span>
+                          {property.purpose === 'Rent' 
+                            ? (isAmharic ? 'ለመከራየት ጥያቄ ላክ' : 'Request to Rent') 
+                            : (isAmharic ? 'ለመግዛት ጥያቄ ላክ' : 'Inquire to Buy')}
+                        </span>
                       </button>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* 6. TAB 4: DEVELOPER MEGA PROJECTS (AYAT, NOAH, TSEHAY)     */}
-      {/* ========================================================= */}
-      {activeTab === 'projects' && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {(developerProjects.length > 0 ? developerProjects : [
-              {
-                id: 'p-1',
-                name: 'Ayat Residential Village 4 (አያት የመኖሪያ መንደር)',
-                developer: 'Ayat Real Estate (አያት ሪል እስቴት)',
-                locality: 'Ayat Zone 5, Addis Ababa',
-                units: 420,
-                handover: '2026',
-                priceRange: '6,500,000 - 18,000,000 ETB',
-                image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
-                desc: 'Luxury apartments and townhouses with dedicated commercial centers, schools, and green parks.'
-              },
-              {
-                id: 'p-2',
-                name: 'Tsehay Real Estate Towers (የፀሐይ ሪል እስቴት ታወርስ)',
-                developer: 'Tsehay Real Estate',
-                locality: 'CMC Road, Addis Ababa',
-                units: 640,
-                handover: '2025/2026',
-                priceRange: '8,200,000 - 24,000,000 ETB',
-                image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
-                desc: 'Modern high-rise residential complex with subterranean parking, gym, and 24/7 power backup.'
-              },
-              {
-                id: 'p-3',
-                name: 'Noah Garden Residences (ኖህ ጋርደን ሬሲደንሲስ)',
-                developer: 'Noah Real Estate',
-                locality: 'Bole Atlas, Addis Ababa',
-                units: 280,
-                handover: '2026',
-                priceRange: '11,000,000 - 32,000,000 ETB',
-                image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80',
-                desc: 'Prime diplomat apartments with panoramic balcony views, European finishes, and gated security.'
-              },
-              {
-                id: 'p-4',
-                name: 'Flintstone Adama Green City (ፍሊንትስቶን አዳማ ግሪን ሲቲ)',
-                developer: 'Flintstone Homes',
-                locality: 'Wonji Road, Adama',
-                units: 350,
-                handover: '2026',
-                priceRange: '4,800,000 - 12,500,000 ETB',
-                image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
-                desc: 'Affordable modern family residences in Adama with solar lighting and ample garden courts.'
-              }
-            ]).map((proj) => (
-              <div key={proj.id || proj._id} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-xs hover:shadow-md transition-all">
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={proj.image || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80'}
-                    alt={proj.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-amber-400 text-xs font-black">
-                    {proj.developer}
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <h3 className="text-lg font-black text-gray-900 mb-1">{proj.name}</h3>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{proj.locality}</span>
-                  </div>
-
-                  <p className="text-xs text-gray-600 mb-4 leading-relaxed line-clamp-2">
-                    {proj.desc}
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 text-xs mb-4">
-                    <div>
-                      <span className="text-[10px] text-gray-400 font-bold block uppercase">{isAmharic ? 'የቤቶች ብዛት' : 'Total Units'}</span>
-                      <span className="font-extrabold text-gray-900">{proj.units || '300+'}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-gray-400 font-bold block uppercase">{isAmharic ? 'ርክክብ' : 'Handover'}</span>
-                      <span className="font-extrabold text-emerald-700">{proj.handover || '2026'}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBookingProperty({
-                        id: proj.id || 'dev-proj',
-                        title: proj.name,
-                        city: proj.locality.includes('Adama') ? 'Adama' : 'Addis Ababa',
-                        price: proj.priceRange || '6,500,000 ETB'
-                      });
-                      setBookingType('buy');
-                      setBookingMessage(
-                        isAmharic 
-                          ? `ሰላም፣ የ ${proj.name} ፕሮጀክት ዝርዝር መረጃና ዋጋዎችን ማወቅ እፈልጋለሁ።` 
-                          : `Hello, I am interested in off-plan units for ${proj.name}. Please contact me.`
-                      );
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors"
-                  >
-                    <span>{isAmharic ? 'የፕሮጀክት መረጃ ይጠይቁ' : 'Inquire for Developer Units'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ========================================================= */}
-      {/* 7. DIRECT RENT / BUY APPLICATION MODAL                    */}
-      {/* ========================================================= */}
-      {bookingProperty && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-gray-100 relative">
-            {bookingSuccess ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 animate-bounce">
-                  <CheckCircle2 className="w-10 h-10" />
-                </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">
-                  {isAmharic ? 'ማመልከቻዎ ደርሷል!' : 'Application Submitted!'}
-                </h3>
-                <p className="text-xs text-gray-600 leading-relaxed max-w-sm mx-auto">
-                  {t.customerApplySuccess}
+        {/* ========================================================= */}
+        {/* 5. TAB CONTENT: 3. MY INQUIRIES & BOOKINGS               */}
+        {/* ========================================================= */}
+        {activeTab === 'inquiries' && (
+          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black text-gray-950">
+                  {isAmharic ? `የተላኩ ጥያቄዎች (${inquiries.length})` : `My Inquiries (${inquiries.length})`}
+                </h2>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isAmharic ? 'ለቤት ባለቤቶች፣ ደላላዎች እና አልሚዎች የላኳቸው የኪራይ፣ የግዢ እና የጉብኝት ጥያቄዎች ዝርዝር።' : 'Track your submitted rent, purchase, and property tour requests.'}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={fetchCustomerInquiries}
+                className="px-3.5 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50"
+              >
+                {isAmharic ? 'አድስ (Refresh)' : 'Refresh'}
+              </button>
+            </div>
+
+            {inquiriesLoading ? (
+              <div className="py-12 text-center text-xs text-gray-500">
+                {isAmharic ? 'ጥያቄዎች በመጫን ላይ ናቸው...' : 'Loading inquiries...'}
+              </div>
+            ) : inquiries.length === 0 ? (
+              <div className="p-12 text-center bg-gray-50 rounded-2xl border border-gray-200">
+                <Clock className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                <h4 className="text-sm font-bold text-gray-800">
+                  {t.customerInquiriesEmpty || 'እስካሁን ምንም አይነት የኪራይ ወይም የግዢ ጥያቄ አልላኩም።'}
+                </h4>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isAmharic ? 'የሚፈልጉትን ቤት መርጠው "ይከራዩ" ወይም "ይግዙ" የሚለውን በመጫን ጥያቄዎን በቀጥታ ያስተላልፉ።' : 'Find a home you love and click Rent or Buy to contact the lister directly.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('browse')}
+                  className="mt-4 px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold"
+                >
+                  {isAmharic ? 'ቤቶችን ይፈልጉ' : 'Search Homes'}
+                </button>
+              </div>
             ) : (
-              <form onSubmit={handleSubmitBooking}>
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                      {bookingType === 'rent' ? (isAmharic ? 'የኪራይ ማመልከቻ' : 'Rent Application') : (isAmharic ? 'የግዢ ማመልከቻ' : 'Purchase Offer')}
-                    </span>
-                    <h3 className="text-lg font-black text-gray-900 mt-1">
-                      {bookingProperty.title_am || bookingProperty.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{bookingProperty.city}</span>
-                    </p>
+              <div className="divide-y divide-gray-100">
+                {inquiries.map((inq, idx) => (
+                  <div key={inq.id || inq._id || idx} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                          inq.inquiryType === 'rent' 
+                            ? 'bg-emerald-100 text-emerald-800' 
+                            : inq.inquiryType === 'buy'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {inq.inquiryType === 'rent' ? 'ኪራይ (Rent)' : inq.inquiryType === 'buy' ? 'ግዢ (Buy)' : 'ጉብኝት (Tour)'}
+                        </span>
+                        <h4 className="text-sm font-bold text-gray-900">
+                          {inq.propertyTitle || 'የቀዳሚ ቤት (Residential Property)'}
+                        </h4>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1 italic">
+                        "{inq.message}"
+                      </p>
+                      <div className="flex items-center gap-3 text-[11px] text-gray-400 mt-2">
+                        <span>{new Date(inq.createdAt).toLocaleDateString()}</span>
+                        <span>•</span>
+                        <span>{inq.phone}</span>
+                        <span>•</span>
+                        <span className="text-emerald-600 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          {isAmharic ? 'ተልኳል (Delivered to Lister)' : 'Delivered to Lister'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setBookingProperty(null)}
-                    className="text-gray-400 hover:text-gray-600 p-1"
-                  >
-                    ✕
-                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* 6. TAB CONTENT: 4. REAL ESTATE DEVELOPERS                 */}
+        {/* ========================================================= */}
+        {activeTab === 'developers' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-black text-gray-950">
+                {isAmharic ? 'የኢትዮጵያ ታላላቅ ሪል እስቴት አልሚዎች' : 'Ethiopia Top Real Estate Developers'}
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                {isAmharic ? 'እንደ አያት፣ ፀሐይ፣ ኖህ እና ፍሊንትስቶን ያሉ ታዋቂ አልሚዎች የሚያቀርቧቸውን ሜጋ የመኖሪያ ፕሮጀክቶች በቀጥታ ይመርምሩ።' : 'Explore major residential mega projects by Ayat, Tsehay, Noah, and Flintstone Homes.'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {developerProjects.map((dev) => (
+                <div key={dev.id || dev._id} className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                  <div className="relative h-48 overflow-hidden bg-slate-900">
+                    <img 
+                      src={dev.image} 
+                      alt={dev.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-purple-600/90 text-white text-[11px] font-black uppercase">
+                      {dev.developer}
+                    </div>
+                  </div>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-base font-extrabold text-gray-950">
+                        {isAmharic ? dev.name_am || dev.name : dev.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                        <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                        <span>{dev.location}</span>
+                      </p>
+                      <p className="text-xs text-gray-600 mt-3 line-clamp-2">
+                        {isAmharic ? dev.desc_am || dev.description : dev.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-[10px] text-gray-400 block">{isAmharic ? 'አጠቃላይ ቤቶች' : 'Total Units'}</span>
+                        <span className="font-bold text-gray-900">{dev.totalUnits} Units</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-gray-400 block">{isAmharic ? 'ርክክብ' : 'Handover'}</span>
+                        <span className="font-bold text-purple-700">{dev.handoverYear}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* 7. QUICK INQUIRY / TOUR MODAL DIALOG                      */}
+        {/* ========================================================= */}
+        {selectedProperty && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative border border-gray-100 max-h-[90vh] overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => setSelectedProperty(null)}
+                className="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="mb-4">
+                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                  inquiryType === 'rent'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : inquiryType === 'buy'
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-teal-100 text-teal-800'
+                }`}>
+                  {inquiryType === 'rent' ? 'የኪራይ ጥያቄ (Rent Request)' : inquiryType === 'buy' ? 'የግዢ ጥያቄ (Buy Request)' : 'የጉብኝት ቀጠሮ (Tour Schedule)'}
+                </span>
+                <h3 className="text-xl font-extrabold text-gray-950 mt-2">
+                  {isAmharic ? selectedProperty.title_am || selectedProperty.title : selectedProperty.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-gray-400" />
+                  <span>{selectedProperty.locality}, {selectedProperty.city}</span>
+                  <span>•</span>
+                  <span className="font-bold text-gray-900">{selectedProperty.price}</span>
+                </p>
+              </div>
+
+              {inquirySuccessMsg && (
+                <div className="mb-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-600" />
+                  <span>{inquirySuccessMsg}</span>
+                </div>
+              )}
+
+              {inquiryErrorMsg && (
+                <div className="mb-4 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-3">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600" />
+                  <span>{inquiryErrorMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitInquiry} className="space-y-4">
+                {/* Request Type Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    {isAmharic ? 'የጥያቄ ዓይነት' : 'Request Type'}
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setInquiryType('rent')}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                        inquiryType === 'rent' 
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-black' 
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {isAmharic ? 'ኪራይ (Rent)' : 'Rent'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInquiryType('buy')}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                        inquiryType === 'buy' 
+                          ? 'bg-amber-50 border-amber-500 text-amber-800 font-black' 
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {isAmharic ? 'ግዢ (Buy)' : 'Buy'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInquiryType('tour')}
+                      className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                        inquiryType === 'tour' 
+                          ? 'bg-teal-50 border-teal-500 text-teal-800 font-black' 
+                          : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {isAmharic ? 'ጉብኝት (Tour)' : 'Tour'}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-3 mb-6">
+                {/* Tour Date (if tour selected) */}
+                {inquiryType === 'tour' && (
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                      {isAmharic ? 'የእርስዎ ስልክ ቁጥር:' : 'Contact Phone Number:'}
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      value={bookingPhone}
-                      onChange={(e) => setBookingPhone(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                      {bookingType === 'rent' 
-                        ? (isAmharic ? 'የመግቢያ የታሰበበት ቀን:' : 'Target Move-in Date:') 
-                        : (isAmharic ? 'የግዢ ፍላጎት ሁኔታ:' : 'Purchase Timeline:')}
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      {isAmharic ? 'ለመጎብኘት የሚመርጡት ቀን' : 'Preferred Visit Date'}
                     </label>
                     <input
                       type="date"
-                      value={bookingDate}
-                      onChange={(e) => setBookingDate(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      value={tourDate}
+                      onChange={(e) => setTourDate(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500"
+                      required
                     />
                   </div>
+                )}
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                      {isAmharic ? 'ለባለቤቱ ወይም ለወኪሉ ተጨማሪ መልእክት:' : 'Note for Property Owner / Agent:'}
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={bookingMessage}
-                      onChange={(e) => setBookingMessage(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
+                {/* Contact Phone */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    {isAmharic ? 'ስልክ ቁጥርዎ' : 'Your Phone Number'}
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="+251 911 000000"
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500"
+                    required
+                  />
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* Message */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                    {isAmharic ? 'መልእክት ወይም ጥያቄ' : 'Message or Special Requests'}
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={customerMessage}
+                    onChange={(e) => setCustomerMessage(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500"
+                    required
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
                   <button
                     type="button"
-                    onClick={() => setBookingProperty(null)}
-                    className="flex-1 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50"
+                    onClick={() => setSelectedProperty(null)}
+                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50"
                   >
-                    {isAmharic ? 'ይቅር' : 'Cancel'}
+                    {isAmharic ? 'ሰርዝ' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
-                    disabled={bookingSubmitting}
-                    className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    disabled={submittingInquiry}
+                    className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-black shadow-md flex items-center gap-2 disabled:opacity-50"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>{bookingSubmitting ? (isAmharic ? 'በመላክ ላይ...' : 'Submitting...') : (isAmharic ? 'ማመልከቻውን ላክ' : 'Submit Application')}</span>
+                    <span>
+                      {submittingInquiry 
+                        ? (isAmharic ? 'በመላክ ላይ...' : 'Sending...') 
+                        : (isAmharic ? 'ጥያቄዬን ላክ' : 'Send Request')}
+                    </span>
                   </button>
                 </div>
               </form>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 }
