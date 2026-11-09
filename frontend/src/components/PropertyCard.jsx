@@ -1,7 +1,17 @@
 import React from 'react';
 import { Heart, MapPin, Bed, Bath, Maximize2 } from 'lucide-react';
 
-export default function PropertyCard({ property, isFavorite, onToggleFavorite, onSelect, onContact, lang, t }) {
+export default function PropertyCard({ 
+  property, 
+  isFavorite, 
+  onToggleFavorite, 
+  onSelect, 
+  onCardClick,
+  onOpenDetails,
+  onContact, 
+  lang, 
+  t 
+}) {
   const isAmharic = lang === 'am';
   
   const displayTitle = (isAmharic && property.title_am) ? property.title_am : property.title;
@@ -14,9 +24,41 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
 
   const perSqMValue = Math.round(property.price / (property.area || 1)).toLocaleString('en-US');
 
+  // Unified Handler to Open Property Details Modal (supports onSelect, onCardClick, or onOpenDetails)
+  const handleViewDetails = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const trigger = onSelect || onCardClick || onOpenDetails;
+    if (typeof trigger === 'function') {
+      trigger(property);
+    }
+  };
+
+  const handleContactClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (typeof onContact === 'function') {
+      onContact(property);
+    }
+  };
+
+  const handleFavoriteClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (typeof onToggleFavorite === 'function') {
+      onToggleFavorite(property);
+    }
+  };
+
   return (
     <article className="property-card">
-      <div className="card-image-wrap">
+      <div className="card-image-wrap cursor-pointer" onClick={handleViewDetails}>
         <img 
           src={property.image_url || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"} 
           alt={displayTitle} 
@@ -36,10 +78,7 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
         )}
         <button 
           className={`btn-favorite-card ${isFavorite ? 'active' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(property);
-          }}
+          onClick={handleFavoriteClick}
           title={isFavorite ? t.shortlisted : "Save"}
           aria-label="Toggle shortlist"
         >
@@ -55,7 +94,7 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
           </span>
         </div>
 
-        <h3 className="card-title" title={displayTitle}>
+        <h3 className="card-title cursor-pointer hover:text-emerald-700 transition-colors" title={displayTitle} onClick={handleViewDetails}>
           {displayTitle}
         </h3>
 
@@ -93,14 +132,14 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
         <div className="card-footer">
           <button 
             className="btn-card-details" 
-            onClick={() => onSelect(property)}
+            onClick={handleViewDetails}
             type="button"
           >
             {t.btnViewDetails}
           </button>
           <button 
             className="btn-card-contact" 
-            onClick={() => onContact(property)}
+            onClick={handleContactClick}
             type="button"
           >
             {t.btnContactAgent}
