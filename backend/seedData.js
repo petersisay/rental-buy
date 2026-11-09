@@ -613,8 +613,8 @@ export const seedProjects = [
 
 export const seedUsers = [
   {
-    name: "Petros Sisay (የሲስተም አስተዳዳሪ)",
-    email: "petrossisay7164@gmail.com",
+    name: "Platform Administrator (የሲስተም አስተዳዳሪ)",
+    email: (typeof process !== 'undefined' && process.env?.ADMIN_EMAIL) || "admin@kedami.et",
     role: "admin",
     status: "approved",
     phone: "+251 911 001122",
