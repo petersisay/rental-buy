@@ -28,12 +28,30 @@ let inMemoryUsers = [...seedUsers.map((u, idx) => ({ ...u, id: u.id || `usr-${id
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/kedami';
 
+// Platform Super Admin Emails (Configured securely via environment variables)
+const ADMIN_EMAILS = [
+  (process.env.ADMIN_EMAIL || '').toLowerCase().trim(),
+  'petrossisay7164@gmail.com',
+  'admin@kedami.et'
+].filter(Boolean);
+
+const isSuperAdminEmail = (email) => {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
+};
+
+// Mask sensitive credentials in logs
+function maskUri(uri) {
+  if (!uri) return '';
+  return uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+}
+
 async function connectDB() {
   try {
     await mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 3000
     });
-    console.log(`✅ MongoDB connected successfully to: ${MONGODB_URI}`);
+    console.log(`✅ MongoDB connected successfully to: ${maskUri(MONGODB_URI)}`);
 
     // Auto-seed if database is empty
     const propCount = await Property.countDocuments();
@@ -98,8 +116,7 @@ app.post('/api/auth/login', async (req, res) => {
       let user = await User.findOne({ email: normalizedEmail });
 
       if (user) {
-        // Petros Sisay is permanently granted full platform Administrator role & status
-        if (normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') {
+        if (isSuperAdminEmail(normalizedEmail)) {
           user.role = 'admin';
           user.status = 'approved';
         }
@@ -112,7 +129,7 @@ app.post('/api/auth/login', async (req, res) => {
       // Determine initial approval status:
       // Pre-approved admin, demo domains and regular customers/seekers get 'approved' without waiting
       // New self-registered owners, agents and developers get 'pending' (requires Admin Approval)
-      const isSuperAdmin = normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et';
+      const isSuperAdmin = isSuperAdminEmail(normalizedEmail);
       const assignedRole = isSuperAdmin ? 'admin' : (role || 'customer');
       const isAutoApproved = isSuperAdmin || 
                              normalizedEmail.endsWith('@kedami.et') || 
@@ -137,14 +154,14 @@ app.post('/api/auth/login', async (req, res) => {
       let user = inMemoryUsers.find(u => u.email.toLowerCase() === normalizedEmail);
 
       if (user) {
-        if (normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') {
+        if (isSuperAdminEmail(normalizedEmail)) {
           user.role = 'admin';
           user.status = 'approved';
         }
         return res.json({ user, isNew: false });
       }
 
-      const isSuperAdminMem = normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et';
+      const isSuperAdminMem = isSuperAdminEmail(normalizedEmail);
       const assignedRole = isSuperAdminMem ? 'admin' : (role || 'customer');
       const isAutoApproved = isSuperAdminMem || 
                              normalizedEmail.endsWith('@kedami.et') || 
@@ -182,7 +199,7 @@ app.post('/api/auth/demo-login', async (req, res) => {
     const targetRole = (role || 'customer').toLowerCase();
 
     const roleEmailMap = {
-      admin: 'petrossisay7164@gmail.com',
+      admin: ADMIN_EMAILS[0] || 'admin@kedami.et',
       owner: 'owner.demo@kedami.et',
       agent: 'agent.demo@kedami.et',
       developer: 'developer.demo@kedami.et',
