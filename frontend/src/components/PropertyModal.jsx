@@ -43,7 +43,8 @@ export default function PropertyModal({ property, onClose, initialContactMode = 
 
     try {
       const apiBase = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-      const res = await fetch(`${apiBase}/api/properties/${property.id}/contact`, {
+      const propId = property?.id || property?._id;
+      const res = await fetch(`${apiBase}/api/properties/${propId}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
