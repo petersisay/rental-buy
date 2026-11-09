@@ -108,8 +108,9 @@ app.post('/api/auth/login', async (req, res) => {
       // Determine initial approval status:
       // Pre-approved admin, demo domains and regular customers/seekers get 'approved' without waiting
       // New self-registered owners, agents and developers get 'pending' (requires Admin Approval)
-      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'customer');
-      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || 
+      const assignedRole = role || ((normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') ? 'admin' : 'customer');
+      const isAutoApproved = normalizedEmail === 'petrossisay7164@gmail.com' ||
+                             normalizedEmail === 'admin@kedami.et' || 
                              normalizedEmail.endsWith('@kedami.et') || 
                              assignedRole === 'seeker' || 
                              assignedRole === 'customer';
@@ -135,8 +136,9 @@ app.post('/api/auth/login', async (req, res) => {
         return res.json({ user, isNew: false });
       }
 
-      const assignedRole = role || (normalizedEmail === 'admin@kedami.et' ? 'admin' : 'customer');
-      const isAutoApproved = normalizedEmail === 'admin@kedami.et' || 
+      const assignedRole = role || ((normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') ? 'admin' : 'customer');
+      const isAutoApproved = normalizedEmail === 'petrossisay7164@gmail.com' ||
+                             normalizedEmail === 'admin@kedami.et' || 
                              normalizedEmail.endsWith('@kedami.et') || 
                              assignedRole === 'seeker' || 
                              assignedRole === 'customer';
@@ -172,7 +174,7 @@ app.post('/api/auth/demo-login', async (req, res) => {
     const targetRole = (role || 'customer').toLowerCase();
 
     const roleEmailMap = {
-      admin: 'admin@kedami.et',
+      admin: 'petrossisay7164@gmail.com',
       owner: 'owner.demo@kedami.et',
       agent: 'agent.demo@kedami.et',
       developer: 'developer.demo@kedami.et',
