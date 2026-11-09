@@ -98,7 +98,11 @@ app.post('/api/auth/login', async (req, res) => {
       let user = await User.findOne({ email: normalizedEmail });
 
       if (user) {
-        // Update avatar or name if Google account provided new values
+        // Petros Sisay is permanently granted full platform Administrator role & status
+        if (normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') {
+          user.role = 'admin';
+          user.status = 'approved';
+        }
         if (avatar && !user.avatar) user.avatar = avatar;
         if (googleId && !user.googleId) user.googleId = googleId;
         await user.save();
@@ -108,9 +112,9 @@ app.post('/api/auth/login', async (req, res) => {
       // Determine initial approval status:
       // Pre-approved admin, demo domains and regular customers/seekers get 'approved' without waiting
       // New self-registered owners, agents and developers get 'pending' (requires Admin Approval)
-      const assignedRole = role || ((normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') ? 'admin' : 'customer');
-      const isAutoApproved = normalizedEmail === 'petrossisay7164@gmail.com' ||
-                             normalizedEmail === 'admin@kedami.et' || 
+      const isSuperAdmin = normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et';
+      const assignedRole = isSuperAdmin ? 'admin' : (role || 'customer');
+      const isAutoApproved = isSuperAdmin || 
                              normalizedEmail.endsWith('@kedami.et') || 
                              assignedRole === 'seeker' || 
                              assignedRole === 'customer';
@@ -133,12 +137,16 @@ app.post('/api/auth/login', async (req, res) => {
       let user = inMemoryUsers.find(u => u.email.toLowerCase() === normalizedEmail);
 
       if (user) {
+        if (normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') {
+          user.role = 'admin';
+          user.status = 'approved';
+        }
         return res.json({ user, isNew: false });
       }
 
-      const assignedRole = role || ((normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et') ? 'admin' : 'customer');
-      const isAutoApproved = normalizedEmail === 'petrossisay7164@gmail.com' ||
-                             normalizedEmail === 'admin@kedami.et' || 
+      const isSuperAdminMem = normalizedEmail === 'petrossisay7164@gmail.com' || normalizedEmail === 'admin@kedami.et';
+      const assignedRole = isSuperAdminMem ? 'admin' : (role || 'customer');
+      const isAutoApproved = isSuperAdminMem || 
                              normalizedEmail.endsWith('@kedami.et') || 
                              assignedRole === 'seeker' || 
                              assignedRole === 'customer';
