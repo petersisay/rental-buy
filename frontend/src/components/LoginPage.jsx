@@ -46,16 +46,6 @@ const DEMO_USERS = [
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
     color: 'purple',
     desc: 'Showcases mega developments (Ayat, Tsehay, Noah)'
-  },
-  {
-    role: 'admin',
-    title: 'Platform Admin',
-    title_am: 'የሲስተም አስተዳዳሪ',
-    email: 'petrossisay7164@gmail.com',
-    name: 'Petros Sisay (System Admin)',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    color: 'amber',
-    desc: 'Approves new users & listings, reviews platform KPIs'
   }
 ];
 
@@ -197,6 +187,8 @@ export default function LoginPage({
       return;
     }
 
+    const isSuperAdmin = googleEmail.toLowerCase().trim() === 'petrossisay7164@gmail.com';
+
     try {
       const gName = googleEmail.split('@')[0].replace('.', ' ');
       const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -204,31 +196,34 @@ export default function LoginPage({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: googleEmail,
-          name: gName.charAt(0).toUpperCase() + gName.slice(1),
+          name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (gName.charAt(0).toUpperCase() + gName.slice(1)),
           googleId: `google-${Date.now()}`,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=4285F4&color=fff`,
-          role: authMode === 'register' ? role : (role || 'customer')
+          role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : (role || 'customer'))
         })
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Google login failed');
 
-      if (data.user.status === 'pending') {
-        setPendingUserNotice(data.user);
+      const loggedUser = isSuperAdmin ? { ...data.user, role: 'admin', status: 'approved' } : data.user;
+
+      if (loggedUser.status === 'pending') {
+        setPendingUserNotice(loggedUser);
       } else {
-        onLoginSuccess(data.user);
+        onLoginSuccess(loggedUser);
       }
     } catch (err) {
       console.warn('Google auth API note, creating local session:', err.message);
+      const gName = googleEmail.split('@')[0].replace('.', ' ');
       const fallbackUser = {
         id: `google-${Date.now()}`,
-        name: gName.charAt(0).toUpperCase() + gName.slice(1),
+        name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (gName.charAt(0).toUpperCase() + gName.slice(1)),
         email: googleEmail,
         googleId: `google-${Date.now()}`,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=4285F4&color=fff`,
-        role: authMode === 'register' ? role : (role || 'customer'),
-        status: (authMode === 'register' && role !== 'customer') ? 'pending' : 'approved',
+        role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : (role || 'customer')),
+        status: isSuperAdmin ? 'approved' : ((authMode === 'register' && role !== 'customer') ? 'pending' : 'approved'),
         city: 'Addis Ababa'
       };
       if (fallbackUser.status === 'pending') {
@@ -253,15 +248,17 @@ export default function LoginPage({
     setError('');
     setPendingUserNotice(null);
 
+    const isSuperAdmin = email.toLowerCase().trim() === 'petrossisay7164@gmail.com';
+
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          name: name || email.split('@')[0],
+          name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (name || email.split('@')[0]),
           phone,
-          role: authMode === 'register' ? role : undefined,
+          role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : undefined),
           company,
           city
         })
@@ -270,13 +267,30 @@ export default function LoginPage({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Authentication failed');
 
-      if (data.user.status === 'pending') {
-        setPendingUserNotice(data.user);
+      const loggedUser = isSuperAdmin ? { ...data.user, role: 'admin', status: 'approved' } : data.user;
+
+      if (loggedUser.status === 'pending') {
+        setPendingUserNotice(loggedUser);
       } else {
-        onLoginSuccess(data.user);
+        onLoginSuccess(loggedUser);
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      console.warn('Auth API fallback:', err.message);
+      const fallbackUser = {
+        id: `usr-${Date.now()}`,
+        name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (name || email.split('@')[0]),
+        email,
+        phone,
+        role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : 'customer'),
+        status: isSuperAdmin ? 'approved' : ((authMode === 'register' && role !== 'customer') ? 'pending' : 'approved'),
+        company,
+        city
+      };
+      if (fallbackUser.status === 'pending') {
+        setPendingUserNotice(fallbackUser);
+      } else {
+        onLoginSuccess(fallbackUser);
+      }
     } finally {
       setLoading(false);
     }
