@@ -60,7 +60,7 @@
   - Each authenticated user has their own profile page showing personal information, role badge, approval status, city, company, and quick metrics (properties listed, bookmarked homes).
   - Inline profile editing allowing users to update their full name, phone number, city, and company with backend persistence (`PATCH /api/auth/users/:id/profile`).
 - **1-Click Demo Profiles for Rapid Testing**:
-  - 🛡️ **Platform Administrator**: `petrossisay7164@gmail.com`
+  - 🛡️ **Platform Administrator**: Protected admin role (configured via environment variables `ADMIN_EMAIL` / `VITE_ADMIN_EMAIL`)
   - 🔑 **Customer / Seeker Demo**: `customer.demo@kedami.et`
   - 🏠 **Property Owner Demo**: `owner.demo@kedami.et`
   - 🏢 **Real Estate Broker Demo**: `agent.demo@kedami.et`
