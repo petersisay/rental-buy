@@ -36,7 +36,17 @@ export default function App() {
         };
       }
       const saved = localStorage.getItem('kedami_user');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.email && (
+          parsed.email.toLowerCase().trim() === 'petrossisay7164@gmail.com' ||
+          parsed.email.toLowerCase().trim() === 'admin@kedami.et'
+        )) {
+          return { ...parsed, role: 'admin', status: 'approved' };
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -109,22 +119,28 @@ export default function App() {
 
   // Auth Handlers
   const handleLoginSuccess = (user) => {
-    setCurrentUser(user);
+    const isSuperAdmin = user && user.email && (
+      user.email.toLowerCase().trim() === 'petrossisay7164@gmail.com' ||
+      user.email.toLowerCase().trim() === 'admin@kedami.et'
+    );
+    const effectiveUser = isSuperAdmin ? { ...user, role: 'admin', status: 'approved' } : user;
+
+    setCurrentUser(effectiveUser);
     try {
-      localStorage.setItem('kedami_user', JSON.stringify(user));
+      localStorage.setItem('kedami_user', JSON.stringify(effectiveUser));
     } catch (e) {
       console.error(e);
     }
 
     // Role-based render after login:
-    // Render the user's role page immediately
-    if (user.role === 'admin') {
+    // If logging in as petrossisay7164@gmail.com, ALWAYS render the admin console page!
+    if (isSuperAdmin || effectiveUser.role === 'admin') {
       setActivePortal('admin');
-    } else if (user.role === 'owner') {
+    } else if (effectiveUser.role === 'owner') {
       setActivePortal('owners');
-    } else if (user.role === 'agent') {
+    } else if (effectiveUser.role === 'agent') {
       setActivePortal('agents');
-    } else if (user.role === 'developer') {
+    } else if (effectiveUser.role === 'developer') {
       setActivePortal('developers');
     } else {
       setActivePortal('customer');
