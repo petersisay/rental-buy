@@ -19,6 +19,17 @@ import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
+const SUPER_ADMIN_EMAILS = [
+  (import.meta.env.VITE_ADMIN_EMAIL || '').toLowerCase().trim(),
+  'petrossisay7164@gmail.com',
+  'admin@kedami.et'
+].filter(Boolean);
+
+const checkIsSuperAdmin = (email) => {
+  if (!email) return false;
+  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase().trim());
+};
+
 export default function App() {
   // Logged-in User State (Persisted in localStorage or demo preview query param)
   const [currentUser, setCurrentUser] = useState(() => {
@@ -38,10 +49,7 @@ export default function App() {
       const saved = localStorage.getItem('kedami_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.email && (
-          parsed.email.toLowerCase().trim() === 'petrossisay7164@gmail.com' ||
-          parsed.email.toLowerCase().trim() === 'admin@kedami.et'
-        )) {
+        if (parsed && parsed.email && checkIsSuperAdmin(parsed.email)) {
           return { ...parsed, role: 'admin', status: 'approved' };
         }
         return parsed;
@@ -119,10 +127,7 @@ export default function App() {
 
   // Auth Handlers
   const handleLoginSuccess = (user) => {
-    const isSuperAdmin = user && user.email && (
-      user.email.toLowerCase().trim() === 'petrossisay7164@gmail.com' ||
-      user.email.toLowerCase().trim() === 'admin@kedami.et'
-    );
+    const isSuperAdmin = user && user.email && checkIsSuperAdmin(user.email);
     const effectiveUser = isSuperAdmin ? { ...user, role: 'admin', status: 'approved' } : user;
 
     setCurrentUser(effectiveUser);
@@ -133,7 +138,7 @@ export default function App() {
     }
 
     // Role-based render after login:
-    // If logging in as petrossisay7164@gmail.com, ALWAYS render the admin console page!
+    // If logging in as an administrator, ALWAYS render the admin console page!
     if (isSuperAdmin || effectiveUser.role === 'admin') {
       setActivePortal('admin');
     } else if (effectiveUser.role === 'owner') {
