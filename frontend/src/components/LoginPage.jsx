@@ -51,8 +51,8 @@ const DEMO_USERS = [
     role: 'admin',
     title: 'Platform Admin',
     title_am: 'የሲስተም አስተዳዳሪ',
-    email: 'admin@kedami.et',
-    name: 'Kedami System Admin',
+    email: 'petrossisay7164@gmail.com',
+    name: 'Petros Sisay (System Admin)',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
     color: 'amber',
     desc: 'Approves new users & listings, reviews platform KPIs'
@@ -93,8 +93,8 @@ export default function LoginPage({
     const fallbackDemoUsers = {
       admin: {
         id: 'usr-admin-demo',
-        name: 'Kedami System Admin (የሲስተም አስተዳዳሪ)',
-        email: 'admin@kedami.et',
+        name: 'Petros Sisay (System Admin)',
+        email: 'petrossisay7164@gmail.com',
         role: 'admin',
         status: 'approved',
         phone: '+251 911 001122',
