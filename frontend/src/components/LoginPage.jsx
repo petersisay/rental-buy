@@ -49,17 +49,6 @@ const DEMO_USERS = [
   }
 ];
 
-const SUPER_ADMIN_EMAILS = [
-  (import.meta.env.VITE_ADMIN_EMAIL || '').toLowerCase().trim(),
-  'petrossisay7164@gmail.com',
-  'admin@kedami.et'
-].filter(Boolean);
-
-const checkIsSuperAdmin = (email) => {
-  if (!email) return false;
-  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase().trim());
-};
-
 export default function LoginPage({ 
   t, 
   lang, 
@@ -94,8 +83,8 @@ export default function LoginPage({
     const fallbackDemoUsers = {
       admin: {
         id: 'usr-admin-demo',
-        name: 'Platform Administrator (የሲስተም አስተዳዳሪ)',
-        email: SUPER_ADMIN_EMAILS[0] || 'admin@kedami.et',
+        name: 'Petros Sisay (System Admin)',
+        email: 'petrossisay7164@gmail.com',
         role: 'admin',
         status: 'approved',
         phone: '+251 911 001122',
@@ -198,7 +187,7 @@ export default function LoginPage({
       return;
     }
 
-    const isSuperAdmin = checkIsSuperAdmin(googleEmail);
+    const isSuperAdmin = googleEmail.toLowerCase().trim() === 'petrossisay7164@gmail.com';
 
     try {
       const gName = googleEmail.split('@')[0].replace('.', ' ');
@@ -207,7 +196,7 @@ export default function LoginPage({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: googleEmail,
-          name: isSuperAdmin ? 'Platform Administrator' : (gName.charAt(0).toUpperCase() + gName.slice(1)),
+          name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (gName.charAt(0).toUpperCase() + gName.slice(1)),
           googleId: `google-${Date.now()}`,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=4285F4&color=fff`,
           role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : (role || 'customer'))
@@ -229,7 +218,7 @@ export default function LoginPage({
       const gName = googleEmail.split('@')[0].replace('.', ' ');
       const fallbackUser = {
         id: `google-${Date.now()}`,
-        name: isSuperAdmin ? 'Platform Administrator' : (gName.charAt(0).toUpperCase() + gName.slice(1)),
+        name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (gName.charAt(0).toUpperCase() + gName.slice(1)),
         email: googleEmail,
         googleId: `google-${Date.now()}`,
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(gName)}&background=4285F4&color=fff`,
@@ -259,7 +248,7 @@ export default function LoginPage({
     setError('');
     setPendingUserNotice(null);
 
-    const isSuperAdmin = checkIsSuperAdmin(email);
+    const isSuperAdmin = email.toLowerCase().trim() === 'petrossisay7164@gmail.com';
 
     try {
       const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -267,7 +256,7 @@ export default function LoginPage({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          name: isSuperAdmin ? 'Platform Administrator' : (name || email.split('@')[0]),
+          name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (name || email.split('@')[0]),
           phone,
           role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : undefined),
           company,
@@ -289,7 +278,7 @@ export default function LoginPage({
       console.warn('Auth API fallback:', err.message);
       const fallbackUser = {
         id: `usr-${Date.now()}`,
-        name: isSuperAdmin ? 'Platform Administrator' : (name || email.split('@')[0]),
+        name: isSuperAdmin ? 'Petros Sisay (System Admin)' : (name || email.split('@')[0]),
         email,
         phone,
         role: isSuperAdmin ? 'admin' : (authMode === 'register' ? role : 'customer'),

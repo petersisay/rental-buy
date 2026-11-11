@@ -6,7 +6,6 @@ import {
   ShieldCheck, AlertCircle, Building, Key, X
 } from 'lucide-react';
 import PropertyCard from './PropertyCard';
-import PropertyModal from './PropertyModal';
 
 export default function CustomerPortal({
   properties = [],
@@ -36,16 +35,6 @@ export default function CustomerPortal({
 
   // Quick Rent/Buy/Tour Modal State
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [fallbackDetailsProp, setFallbackDetailsProp] = useState(null);
-
-  const handleShowPropertyDetails = (property) => {
-    if (typeof onOpenDetails === 'function') {
-      onOpenDetails(property);
-    } else {
-      setFallbackDetailsProp(property);
-    }
-  };
-
   const [inquiryType, setInquiryType] = useState('rent'); // 'rent', 'buy', 'tour'
   const [tourDate, setTourDate] = useState('');
   const [customerPhone, setCustomerPhone] = useState(currentUser?.phone || '');
@@ -431,9 +420,7 @@ export default function CustomerPortal({
                       onContact={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
                       onToggleFavorite={onToggleFavorite}
                       isFavorite={favorites.some((f) => f.id === property.id || f.id === property._id)}
-                      onSelect={handleShowPropertyDetails}
-                      onCardClick={handleShowPropertyDetails}
-                      onOpenDetails={handleShowPropertyDetails}
+                      onCardClick={onOpenDetails}
                       lang={lang}
                       t={t}
                     />
@@ -513,9 +500,7 @@ export default function CustomerPortal({
                       onContact={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
                       onToggleFavorite={onToggleFavorite}
                       isFavorite={true}
-                      onSelect={handleShowPropertyDetails}
-                      onCardClick={handleShowPropertyDetails}
-                      onOpenDetails={handleShowPropertyDetails}
+                      onCardClick={onOpenDetails}
                       lang={lang}
                       t={t}
                     />
@@ -844,16 +829,6 @@ export default function CustomerPortal({
               </form>
             </div>
           </div>
-        )}
-
-        {/* Fallback Property Details Modal if not handled by root App */}
-        {fallbackDetailsProp && (
-          <PropertyModal
-            property={fallbackDetailsProp}
-            onClose={() => setFallbackDetailsProp(null)}
-            lang={lang}
-            t={t}
-          />
         )}
 
       </div>
