@@ -23,6 +23,17 @@ export default function CustomerPortal({
   // Active Sub-tab in Customer Portal: 'browse', 'favorites', 'inquiries', 'developers'
   const [activeTab, setActiveTab] = useState('browse');
 
+  // Scroll to header / top whenever sub-tab changes
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, [activeTab]);
+
   // Filter States for Customer Browsing
   const [filterPurpose, setFilterPurpose] = useState('all'); // 'all', 'Rent', 'Sale'
   const [filterCity, setFilterCity] = useState('all'); // 'all', 'Addis Ababa', 'Adama'
