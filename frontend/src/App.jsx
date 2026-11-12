@@ -87,8 +87,25 @@ export default function App() {
     });
   };
 
+  // Scroll to header / top of page helper
+  const scrollToTop = () => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  };
+
+  // Ensure every view/portal change starts from the top/header
+  useEffect(() => {
+    scrollToTop();
+  }, [activePortal]);
+
   // Safe Navigation Handler that enforces login for role-protected pages
   const handleNavigate = (portal, options = {}) => {
+    scrollToTop();
     if (portal === 'login') {
       setLoginOptions({
         role: options.role || 'seeker',
@@ -119,6 +136,7 @@ export default function App() {
 
   // Auth Handlers
   const handleLoginSuccess = (user) => {
+    scrollToTop();
     const isSuperAdmin = user && user.email && (
       user.email.toLowerCase().trim() === 'petrossisay7164@gmail.com' ||
       user.email.toLowerCase().trim() === 'admin@kedami.et'
@@ -157,6 +175,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    scrollToTop();
     setCurrentUser(null);
     try {
       localStorage.removeItem('kedami_user');
@@ -329,6 +348,7 @@ export default function App() {
   };
 
   const handleQuickSearchSubmit = (quickParams) => {
+    scrollToTop();
     setFilters((prev) => ({
       ...prev,
       city: quickParams.city !== undefined ? quickParams.city : prev.city,
@@ -339,13 +359,13 @@ export default function App() {
   };
 
   const handleFilterLocality = (targetCity, targetLocality) => {
+    scrollToTop();
     setFilters((prev) => ({
       ...prev,
       city: targetCity,
       search: targetLocality
     }));
     setActivePortal('search');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const pendingCount = properties.filter((p) => p.status === 'pending').length;
