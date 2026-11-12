@@ -428,10 +428,11 @@ export default function CustomerPortal({
                   <div key={property._id || property.id} className="relative group bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
                     <PropertyCard
                       property={property}
+                      onSelect={onOpenDetails}
+                      onCardClick={onOpenDetails}
                       onContact={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
                       onToggleFavorite={onToggleFavorite}
                       isFavorite={favorites.some((f) => f.id === property.id || f.id === property._id)}
-                      onCardClick={onOpenDetails}
                       lang={lang}
                       t={t}
                     />
@@ -508,10 +509,11 @@ export default function CustomerPortal({
                   <div key={property._id || property.id} className="relative group bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm flex flex-col justify-between">
                     <PropertyCard
                       property={property}
+                      onSelect={onOpenDetails}
+                      onCardClick={onOpenDetails}
                       onContact={() => handleOpenInquiryModal(property, property.purpose === 'Rent' ? 'rent' : 'buy')}
                       onToggleFavorite={onToggleFavorite}
                       isFavorite={true}
-                      onCardClick={onOpenDetails}
                       lang={lang}
                       t={t}
                     />
