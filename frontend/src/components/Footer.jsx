@@ -15,6 +15,27 @@ export default function Footer({
 }) {
   const isAmharic = lang === 'am';
 
+  // Helper to immediately scroll to header/top on footer clicks
+  const scrollToTop = () => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  };
+
+  const handleFooterNavigate = (portal, options) => {
+    scrollToTop();
+    if (onNavigate) onNavigate(portal, options);
+  };
+
+  const handleFooterFilter = (city, locality) => {
+    scrollToTop();
+    if (onFilterLocality) onFilterLocality(city, locality);
+  };
+
   // State for Information Modals (Terms, Privacy, Safety, FAQ)
   const [activeModal, setActiveModal] = useState(null); // 'terms', 'privacy', 'safety', 'faq'
 
@@ -90,7 +111,7 @@ export default function Footer({
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <div 
-              onClick={() => onNavigate('landing')} 
+              onClick={() => handleFooterNavigate('landing')} 
               className="cursor-pointer inline-block group"
               title={isAmharic ? 'ወደ መነሻ ገጽ ተመለስ' : 'Return to Home'}
             >
@@ -150,7 +171,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Addis Ababa', 'Bole')}
+                  onClick={() => handleFooterFilter('Addis Ababa', 'Bole')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
@@ -160,7 +181,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Addis Ababa', 'Kazanchis')}
+                  onClick={() => handleFooterFilter('Addis Ababa', 'Kazanchis')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
@@ -170,7 +191,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Addis Ababa', 'CMC')}
+                  onClick={() => handleFooterFilter('Addis Ababa', 'CMC')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
@@ -180,7 +201,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Addis Ababa', 'Old Airport')}
+                  onClick={() => handleFooterFilter('Addis Ababa', 'Old Airport')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
@@ -190,7 +211,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Addis Ababa', 'Sarbet')}
+                  onClick={() => handleFooterFilter('Addis Ababa', 'Sarbet')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
@@ -200,7 +221,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Addis Ababa', 'Ayat')}
+                  onClick={() => handleFooterFilter('Addis Ababa', 'Ayat')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-emerald-400 transition-colors"></span>
@@ -220,7 +241,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Adama', 'Bole')}
+                  onClick={() => handleFooterFilter('Adama', 'Bole')}
                   className="hover:text-amber-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
@@ -230,7 +251,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Adama', 'Dembela')}
+                  onClick={() => handleFooterFilter('Adama', 'Dembela')}
                   className="hover:text-amber-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
@@ -240,7 +261,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Adama', 'Posta Bet')}
+                  onClick={() => handleFooterFilter('Adama', 'Posta Bet')}
                   className="hover:text-amber-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
@@ -250,7 +271,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Adama', 'Wonji Road')}
+                  onClick={() => handleFooterFilter('Adama', 'Wonji Road')}
                   className="hover:text-amber-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
@@ -260,7 +281,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Adama', 'Boku')}
+                  onClick={() => handleFooterFilter('Adama', 'Boku')}
                   className="hover:text-amber-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
@@ -270,7 +291,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onFilterLocality('Adama', 'Geda')}
+                  onClick={() => handleFooterFilter('Adama', 'Geda')}
                   className="hover:text-amber-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-700 group-hover:bg-amber-400 transition-colors"></span>
@@ -290,7 +311,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('customer')}
+                  onClick={() => handleFooterNavigate('customer')}
                   className="hover:text-teal-400 transition-colors text-left flex items-center gap-1.5 group text-teal-300 font-bold"
                 >
                   <Key className="w-3.5 h-3.5 text-teal-400" />
@@ -300,7 +321,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('search')}
+                  onClick={() => handleFooterNavigate('search')}
                   className="hover:text-teal-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <Home className="w-3.5 h-3.5 text-slate-500 group-hover:text-teal-400" />
@@ -310,7 +331,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('owners')}
+                  onClick={() => handleFooterNavigate('owners')}
                   className="hover:text-emerald-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <Building2 className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400" />
@@ -320,7 +341,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('agents')}
+                  onClick={() => handleFooterNavigate('agents')}
                   className="hover:text-blue-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <Briefcase className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400" />
@@ -330,7 +351,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('developers')}
+                  onClick={() => handleFooterNavigate('developers')}
                   className="hover:text-purple-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <Building className="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-400" />
@@ -340,7 +361,7 @@ export default function Footer({
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('admin')}
+                  onClick={() => handleFooterNavigate('admin')}
                   className="hover:text-rose-400 transition-colors text-left flex items-center gap-1.5 group"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-slate-500 group-hover:text-rose-400" />
