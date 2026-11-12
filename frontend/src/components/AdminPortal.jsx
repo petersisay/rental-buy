@@ -16,6 +16,17 @@ export default function AdminPortal({
   const isAmharic = lang === 'am';
 
   const [activeTab, setActiveTab] = useState('properties'); // 'properties' | 'users' | 'inquiries' | 'stats'
+
+  // Scroll to header / top whenever admin sub-tab changes
+  useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, [activeTab]);
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [inquiries, setInquiries] = useState([]);
