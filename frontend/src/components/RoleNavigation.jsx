@@ -68,6 +68,17 @@ export default function RoleNavigation({
 
   const tabs = getAuthorizedTabs();
 
+  const handleTabClick = (tabId) => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    onSelectTab(tabId);
+  };
+
   return (
     <div className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm overflow-x-auto">
       <div className="max-w-7xl mx-auto px-4 flex gap-1 sm:gap-2 py-2">
@@ -82,7 +93,7 @@ export default function RoleNavigation({
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
-              onClick={() => onSelectTab(tab.id)}
+              onClick={() => handleTabClick(tab.id)}
               type="button"
             >
               <Icon size={16} />
