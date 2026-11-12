@@ -45,6 +45,21 @@ export default function Navbar({
     }
   };
 
+  const scrollToTop = () => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  };
+
+  const handleLogoClick = () => {
+    scrollToTop();
+    onNavigate(currentUser ? (currentUser.role === 'admin' ? 'admin' : 'landing') : 'landing');
+  };
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,7 +67,7 @@ export default function Navbar({
           {/* Logo Group */}
           <div 
             className="flex items-center cursor-pointer select-none group"
-            onClick={() => onNavigate(currentUser ? (currentUser.role === 'admin' ? 'admin' : 'landing') : 'landing')}
+            onClick={handleLogoClick}
           >
             <KedamiLogo 
               variant="image" 
