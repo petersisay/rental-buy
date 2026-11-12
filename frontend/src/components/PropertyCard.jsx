@@ -1,8 +1,27 @@
 import React from 'react';
 import { Heart, MapPin, Bed, Bath, Maximize2 } from 'lucide-react';
 
-export default function PropertyCard({ property, isFavorite, onToggleFavorite, onSelect, onContact, lang, t }) {
+export default function PropertyCard({ 
+  property, 
+  isFavorite, 
+  onToggleFavorite, 
+  onSelect, 
+  onCardClick, 
+  onContact, 
+  lang, 
+  t 
+}) {
   const isAmharic = lang === 'am';
+  
+  const handleSelect = (e) => {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    const selectFn = onSelect || onCardClick;
+    if (selectFn) {
+      selectFn(property);
+    }
+  };
   
   const displayTitle = (isAmharic && property.title_am) ? property.title_am : property.title;
   const displayPrice = (isAmharic && property.price_formatted_am) ? property.price_formatted_am : property.price_formatted;
@@ -16,7 +35,7 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
 
   return (
     <article className="property-card">
-      <div className="card-image-wrap">
+      <div className="card-image-wrap cursor-pointer" onClick={handleSelect}>
         <img 
           src={property.image_url || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"} 
           alt={displayTitle} 
@@ -55,7 +74,7 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
           </span>
         </div>
 
-        <h3 className="card-title" title={displayTitle}>
+        <h3 className="card-title cursor-pointer hover:text-emerald-700 transition-colors" title={displayTitle} onClick={handleSelect}>
           {displayTitle}
         </h3>
 
@@ -92,15 +111,18 @@ export default function PropertyCard({ property, isFavorite, onToggleFavorite, o
 
         <div className="card-footer">
           <button 
-            className="btn-card-details" 
-            onClick={() => onSelect(property)}
+            className="btn-card-details cursor-pointer" 
+            onClick={handleSelect}
             type="button"
           >
             {t.btnViewDetails}
           </button>
           <button 
-            className="btn-card-contact" 
-            onClick={() => onContact(property)}
+            className="btn-card-contact cursor-pointer" 
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onContact) onContact(property);
+            }}
             type="button"
           >
             {t.btnContactAgent}
